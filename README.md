@@ -1,5 +1,7 @@
 # pstack
 
+This is [wtigero's fork](https://github.com/wtigero/pstack-claude) of [Michael Denyer's port](https://github.com/michael-denyer/pstack-claude). Claude Code and Codex share a single-agent default. Delegate only independent workstreams or warranted independent review. Claude Code also gets a session band with workflow buttons. See [fork setup and verification](docs/fork.md).
+
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/codenyer)
 
 Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated Cursor skill stack that improves agent outcomes. This is a port for Claude Code, Codex, Pi, GitHub Copilot, Muse, and other agent harnesses. It tracks upstream and also carries named policy forks, each declared in [`tools/forks.json`](tools/forks.json).
@@ -16,11 +18,11 @@ For concurrency bugs and invariants that tests cannot reach, `/create-formal-ver
 Run in Claude Code 2.1.292 or later:
 
 ```text
-/plugin marketplace add michael-denyer/pstack-claude
-/plugin install pstack@pstack-claude
+/plugin marketplace add wtigero/pstack-claude
+/plugin install pstack@pstack-wtigero
 ```
 
-Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `pstack-claude`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@pstack-claude`.
+Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `pstack-wtigero`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@pstack-wtigero`.
 
 </details>
 
@@ -31,8 +33,8 @@ Claude Code leaves auto-update off for third-party marketplaces, so pstack stays
 Run in your terminal:
 
 ```shell
-codex plugin marketplace add michael-denyer/pstack-claude
-codex plugin add pstack@pstack-claude
+codex plugin marketplace add wtigero/pstack-claude
+codex plugin add pstack@pstack-wtigero
 ```
 
 </details>
@@ -56,8 +58,8 @@ The package loads the skills and the pstack Pi extension, which adds the subagen
 Run in your terminal:
 
 ```shell
-copilot plugin marketplace add michael-denyer/pstack-claude
-copilot plugin install pstack@pstack-claude
+copilot plugin marketplace add wtigero/pstack-claude
+copilot plugin install pstack@pstack-wtigero
 ```
 
 This installs pstack for the Copilot CLI and the GitHub Copilot app, which share `~/.copilot`. Start a new session afterwards. Copilot ships no default pstack models, so the first skill that needs one runs `setup-pstack` to pick from the models your account lists, and later sessions reuse that choice.

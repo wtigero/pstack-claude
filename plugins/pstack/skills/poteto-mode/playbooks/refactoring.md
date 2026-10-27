@@ -2,6 +2,8 @@
 
 Resolve the driver skill through [poteto-mode's Non-negotiables](../SKILL.md#non-negotiables).
 
+Apply the [delegation policy](../references/delegation.md) before any dispatch. Implement with the main agent by default. The delegation language below applies only to a justified independent workstream.
+
 **You own the contract. The structure changes. The behavior does not.** Distinct from Feature, which adds behavior, and Bug fix, which corrects it.
 
 If the cleanup reveals a missing feature or a real bug, split it out and ship the structural change first against the pinned contract. A redesign is allowed, but name it and route to Feature. Large or cross-cutting structural work belongs to the **figure-it-out** skill. This playbook is the focused-to-medium change.

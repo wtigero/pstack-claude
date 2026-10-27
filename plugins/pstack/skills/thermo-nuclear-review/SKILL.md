@@ -3,6 +3,10 @@ name: thermo-nuclear-review
 description: Comprehensive security and correctness audit of a branch's changes. Use for thermo nuclear, thermonuclear, or deep review requests, or branch/PR diff audits focused on bugs, breaking changes, security issues, devex regressions, and feature-gate leaks.
 ---
 
+
+## Delegation gate
+
+Read and apply the [delegation policy](../poteto-mode/references/delegation.md) before any dispatch. It overrides automatic spawning and panel sizes below. Default to one agent. When the gate does not justify delegation, perform the roles sequentially in the main agent and do not claim independent review. Select models only after the gate allows dispatch.
 # Thermo Nuclear Review
 
 Use this skill for a comprehensive security and correctness audit of a checked-out branch.

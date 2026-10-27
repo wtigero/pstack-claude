@@ -1,13 +1,13 @@
 {
   "name": "pstack",
-  "version": "0.9.103",
+  "version": "0.9.104",
   "description": "If you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence. Codex port of the Claude Code plugin; skills are shared, tool names resolve via skills/poteto-mode/references/codex-tools.md. Original pstack by Lauren Tan (poteto).",
   "author": {
-    "name": "Michael Denyer",
-    "url": "https://github.com/michael-denyer"
+    "name": "wtigero",
+    "url": "https://github.com/wtigero"
   },
-  "homepage": "https://github.com/michael-denyer/pstack-claude",
-  "repository": "https://github.com/michael-denyer/pstack-claude",
+  "homepage": "https://github.com/wtigero/pstack-claude",
+  "repository": "https://github.com/wtigero/pstack-claude",
   "license": "MIT",
   "keywords": [
     "pstack",
@@ -30,9 +30,9 @@
   "skills": "./skills/",
   "hooks": "./hooks/codex-hooks.json",
   "interface": {
-    "displayName": "pstack",
-    "shortDescription": "Rigorous, parallelizable agent workflows: go deep first, write less, verify everything",
-    "longDescription": "pstack guides agent work through poteto-mode's principles, parallel design exploration (architect/arena), adversarial multi-model review (interrogate), root-cause debugging, prose deslopping, and verified delivery. Skills are shared with the Claude Code build; on Codex, tool names resolve via the codex-tools mapping.",
+    "displayName": "pstack (wtigero)",
+    "shortDescription": "Single-agent workflows with deliberate parallel work and independent review",
+    "longDescription": "pstack shares workflows across Claude Code and Codex. The main agent owns the task by default. Delegate concrete independent workstreams or warranted independent review after applying the shared policy. Model sheets select models only after that decision.",
     "developerName": "Michael Denyer (port of Lauren Tan's pstack)",
     "category": "Developer Tools",
     "capabilities": [
@@ -44,7 +44,7 @@
       "Work on this in poteto-mode.",
       "Interrogate this diff with multiple models."
     ],
-    "websiteURL": "https://github.com/michael-denyer/pstack-claude",
+    "websiteURL": "https://github.com/wtigero/pstack-claude",
     "brandColor": "#7C3AED",
     "composerIcon": "./assets/pstack-icon.png",
     "logo": "./assets/pstack-icon.png"
