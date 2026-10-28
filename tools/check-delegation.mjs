@@ -65,9 +65,18 @@ function sessionGroups(root) {
 }
 
 export function workflowLoaded(records, runtime) {
-  return records.some(record => runtime === "claude"
-    ? record.type === "assistant" && record.message?.content?.some(block => block.type === "tool_use" && block.name === "Skill" && block.input?.skill === "pstack:poteto-mode")
-    : record.type === "item.completed" && record.item?.type === "command_execution" && record.item.exit_code === 0 && /poteto-mode\/SKILL\.md/.test(record.item.command));
+  if (runtime === "codex") return records.some(record =>
+    record.type === "item.completed" && record.item?.type === "command_execution" && record.item.exit_code === 0 &&
+    /poteto-mode\/SKILL\.md/.test(record.item.command) &&
+    record.item.aggregated_output?.includes("# Poteto mode") && record.item.aggregated_output.includes("## Delegation gate"));
+  const calls = new Set();
+  for (const record of records) {
+    for (const block of record.message?.content ?? []) {
+      if (record.type === "assistant" && block.type === "tool_use" && block.name === "Skill" && block.input?.skill === "pstack:poteto-mode") calls.add(block.id);
+      if (record.type === "user" && block.type === "tool_result" && calls.has(block.tool_use_id) && !block.is_error) return true;
+    }
+  }
+  return false;
 }
 
 export function turnSucceeded(records, runtime) {
@@ -135,36 +144,61 @@ function prepareCodexHome(home, bin) {
   return env;
 }
 
-async function runCandidate(bin, args, cwd, env, prompt, logPath) {
+export async function runCandidate(bin, args, cwd, env, prompt, logPath, timeoutMs = 10 * 60_000) {
   const log = createWriteStream(logPath, { mode: 0o600 });
   const errors = createWriteStream(`${logPath}.stderr`, { mode: 0o600 });
   const records = [];
   let pending = "";
   const child = spawn(bin, args, { cwd, env, detached: process.platform !== "win32", stdio: ["pipe", "pipe", "pipe"] });
+  const closed = new Promise(resolve => {
+    child.once("error", error => resolve({ error }));
+    child.once("close", code => resolve({ code }));
+  });
+  let rejectRun;
+  const failed = new Promise((_, reject) => { rejectRun = reject; });
   child.stdout.on("data", chunk => {
     log.write(chunk);
     pending += chunk;
     let end;
-    while ((end = pending.indexOf("\n")) !== -1) {
-      const line = pending.slice(0, end); pending = pending.slice(end + 1);
-      if (line.trim()) records.push(JSON.parse(line));
-    }
+    try {
+      while ((end = pending.indexOf("\n")) !== -1) {
+        const line = pending.slice(0, end); pending = pending.slice(end + 1);
+        if (line.trim()) records.push(JSON.parse(line));
+      }
+    } catch (error) { rejectRun(error); }
   });
   child.stderr.pipe(errors);
   child.stdin.end(prompt);
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
-    if (process.platform === "win32") child.kill();
-    else process.kill(-child.pid, "SIGTERM");
-  }, 10 * 60_000);
+  const interrupt = signal => rejectRun(new Error(`Interrupted by ${signal}; see ${logPath}`));
+  const onInterrupt = () => interrupt("SIGINT");
+  const onTerminate = () => interrupt("SIGTERM");
+  process.on("SIGINT", onInterrupt);
+  process.on("SIGTERM", onTerminate);
+  const timer = setTimeout(() => rejectRun(new Error(`${bin} timed out; see ${logPath}`)), timeoutMs);
+  const signalGroup = signal => {
+    if (!child.pid) return;
+    try {
+      if (process.platform === "win32") child.kill(signal);
+      else process.kill(-child.pid, signal);
+    } catch (error) { if (error.code !== "ESRCH") throw error; }
+  };
   try {
-    const code = await new Promise((resolve, reject) => { child.on("error", reject); child.on("close", resolve); });
-    if (timedOut || code !== 0) throw new Error(`${bin} ${timedOut ? "timed out" : `exited ${code}`}; see ${logPath}`);
+    const result = await Promise.race([closed, failed]);
+    if (result.error) throw result.error;
+    if (result.code !== 0) throw new Error(`${bin} exited ${result.code}; see ${logPath}`);
+    if (pending.trim()) records.push(JSON.parse(pending));
     return records;
   } finally {
     clearTimeout(timer);
-    log.end(); errors.end();
+    signalGroup("SIGTERM");
+    let grace;
+    await Promise.race([closed, new Promise(resolve => { grace = setTimeout(resolve, 1000); })]);
+    clearTimeout(grace);
+    signalGroup("SIGKILL");
+    await closed;
+    process.off("SIGINT", onInterrupt);
+    process.off("SIGTERM", onTerminate);
+    await Promise.all([new Promise(resolve => log.end(resolve)), new Promise(resolve => errors.end(resolve))]);
   }
 }
 
