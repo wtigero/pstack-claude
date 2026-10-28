@@ -19,3 +19,7 @@ plugins/pstack/skills/poteto-mode/scripts/node_modules/
 
 # Lake build output for the Lean models
 /lean/.lake/
+
+# Claude Code writes declarations for the installed host version.
+plugins/pstack/.claude-plugin/types/
+plugins/pstack/tsconfig.json

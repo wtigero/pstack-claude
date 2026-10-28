@@ -1,5 +1,7 @@
 ### Perf issue
 
+Apply the [delegation policy](../references/delegation.md) before any dispatch. Implement with the main agent by default. The delegation language below applies only to a justified independent workstream.
+
 **You own the measurement story. Plan, review, verify the numbers.** Tie every fix to a measurement, don't read source instead of measuring.
 
 1. Capture a baseline trace via the matching driver skill. Vet the baseline, and each later number, with the **benchmark-checklist** skill.

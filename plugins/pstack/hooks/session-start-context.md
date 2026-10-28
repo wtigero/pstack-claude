@@ -1,6 +1,8 @@
 <EXTREMELY_IMPORTANT>
 You have pstack.
 
+Default to one agent for exploration, planning, implementation, and verification. Spawn only for concrete independent workstreams that can progress in parallel, or justified independent review. Before dispatch, read poteto-mode's references/delegation.md. That policy overrides automatic delegation and panel sizes in all pstack workflows. Model-routing rows select models only after delegation is justified. Preserve independent review explicitly required by the user or project.
+
 Invoke the `pstack:poteto-mode` skill and follow its instructions when a task meets any of these:
 
 - it touches more than one file, or changes a signature other files call

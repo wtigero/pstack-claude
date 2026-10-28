@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
 // The one directory walker for every tool in tools/. `node_modules` under
@@ -14,6 +14,7 @@ export function walk(dir) {
   const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
   return entries.flatMap((entry) => {
     if (SKIPPED_DIRS.has(entry.name)) return [];
+    if (entry.name === "types" && basename(dir) === ".claude-plugin") return [];
     const path = join(dir, entry.name);
     return entry.isDirectory() ? walk(path) : [path];
   });

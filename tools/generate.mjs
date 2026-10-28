@@ -816,7 +816,10 @@ const MATCHER_GROUP = Type.Object(
   { matcher: Type.Optional(Type.String()), hooks: Type.Array(Type.Object({ type: Type.String() })) },
   { additionalProperties: false },
 );
-const HOOKS_FILE = Type.Object({ hooks: Type.Record(Type.String(), Type.Array(MATCHER_GROUP)) });
+const HOOKS_FILE = Type.Object({
+  hooks: Type.Record(Type.String(), Type.Array(MATCHER_GROUP)),
+  modules: Type.Optional(Type.Array(Type.String(), { minItems: 1, maxItems: 1 })),
+});
 
 // typebox reports an unknown key twice, as a false schema at the key and as
 // additionalProperties on its object; the second names every such key.
@@ -839,6 +842,12 @@ export function validateHooks(hooksJson, { statOf, file = "hooks/hooks.json", ro
   const raw = JSON.parse(hooksJson);
   const faults = shapeFaults(HOOKS_FILE, raw, "file");
   if (faults.length) throw new Error(`${file}:\n  ${faults.join("\n  ")}`);
+  for (const module of raw.modules ?? []) {
+    const path = join(dirname(file), module);
+    if (!module.startsWith("./") || path.startsWith("..") || !statOf(path)?.isFile()) {
+      faults.push(`module ${module} must name a file inside the plugin relative to ${file}`);
+    }
+  }
   for (const [event, groups] of Object.entries(raw.hooks)) {
     for (const hook of groups.flatMap((group) => group.hooks)) {
       const schema = Object.hasOwn(HOOK_TYPES, hook.type) ? HOOK_TYPES[hook.type] : undefined;

@@ -3,6 +3,10 @@ name: thermo-nuclear-code-quality-review
 description: Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a thermo-nuclear code quality review, thermonuclear review, deep code quality audit, or especially harsh maintainability review.
 ---
 
+
+## Delegation gate
+
+Read and apply the [delegation policy](../poteto-mode/references/delegation.md) before any dispatch. It overrides automatic spawning and panel sizes below. Default to one agent. When the gate does not justify delegation, perform the roles sequentially in the main agent and do not claim independent review. Select models only after the gate allows dispatch.
 # Thermo-Nuclear Code Quality Review
 
 Use this skill for an unusually strict review focused on implementation quality, maintainability, abstraction quality, and codebase health.

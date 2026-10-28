@@ -2,6 +2,27 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.107 - Open the session band without a slash command
+
+- Keep the band visible by default and add a Show pstack button after hiding it.
+- Remove the dynamic band command that Desktop can reject before session startup.
+
+## 0.9.106 - Simplify the Claude Code band
+
+- Align workflow buttons to the right of session status.
+- Remove the model and effort display and its unused state tracking.
+
+## 0.9.105 - Separate the Claude Code band from other Mods
+
+- Give the pstack band its own border and spacing when composed with another Mod.
+- Wrap status and workflow controls when the prompt area is narrow.
+
+## 0.9.104 - Single-agent workflows and Claude Code band
+
+- Default shared Claude Code and Codex workflows to one agent, with explicit delegation gates and independent review when warranted.
+- Add a Claude Code Mods band with observed session usage, model, agent status, and workflow drafts.
+- Publish this fork through the pstack-wtigero marketplace while retaining the pstack skill namespace.
+
 ## 0.9.103 - sync to upstream e73df47 (v0.15.32): adds /statechart and /ketchup-video
 
 The upstream pin moves from `7b353f7` to `e73df47`, upstream v0.15.32, 18 pstack commits. `/statechart` draws how a system moves between states as a Mermaid statechart generated from a TLA+ model, with each bug TLC finds as a numbered path, and also turns an agreed chart into a TLA+ skeleton. Its first run installs TLC and Java with mise, about 305 MB. `/ketchup-video` gives the `/ketchup` catch-up as a short silent video of slides, with the waiting calls as text under it. `/create-formal-verification-skill` now tells the skill it generates to read each TLA+ result with `/statechart`, and `/poteto-help` routes to both new skills. The package now carries 43 public skills and 24 principles.

@@ -3,13 +3,17 @@ name: arena
 description: "Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it. Use for /arena, 'arena this', 'throw it in the arena', or when one attempt at a non-trivial artifact would lock in the wrong shape."
 ---
 
-# Arena
+
+## Delegation gate
 
 On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
 
 On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
 
 On Muse, read the [platform mapping](../poteto-mode/references/muse-tools.md), including its per-skill notes, before following this skill.
+
+Read and apply the [delegation policy](../poteto-mode/references/delegation.md) before any dispatch. It overrides automatic spawning and panel sizes below. Default to one agent. When the gate does not justify delegation, perform the roles sequentially in the main agent and do not claim independent review. Select models only after the gate allows dispatch.
+# Arena
 
 Open a todolist with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything.
 

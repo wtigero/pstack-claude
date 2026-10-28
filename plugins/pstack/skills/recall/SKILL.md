@@ -3,11 +3,15 @@ name: recall
 description: "Reconstruct your recent working context from your own chat history, live state, and the shared record (user reports, prior fixes, incidents), then hand back a tight current-state brief. Use for 'recall my work on X', 'catch me up', 'what have I been working on', 'where did I leave off', before starting or resuming work, and before telling the user that something was never recorded."
 ---
 
-# Recall
+
+## Delegation gate
 
 On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
 
 On Muse, read the [platform mapping](../poteto-mode/references/muse-tools.md), including its per-skill notes, before following this skill.
+
+Read and apply the [delegation policy](../poteto-mode/references/delegation.md) before any dispatch. It overrides automatic spawning and panel sizes below. Default to one agent. When the gate does not justify delegation, perform the roles sequentially in the main agent and do not claim independent review. Select models only after the gate allows dispatch.
+# Recall
 
 **Before you start or resume work, you rebuild the user's recent working context and hand back a tight capsule of where things stand now and what to do next.**
 

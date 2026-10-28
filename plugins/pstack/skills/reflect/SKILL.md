@@ -3,13 +3,17 @@ name: reflect
 description: Spawn three parallel review subagents over the active transcript, surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect.
 ---
 
-# Reflect
+
+## Delegation gate
 
 On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
 
 On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
 
 On Muse, read the [platform mapping](../poteto-mode/references/muse-tools.md), including its per-skill notes, before following this skill.
+
+Read and apply the [delegation policy](../poteto-mode/references/delegation.md) before any dispatch. It overrides automatic spawning and panel sizes below. Default to one agent. When the gate does not justify delegation, perform the roles sequentially in the main agent and do not claim independent review. Select models only after the gate allows dispatch.
+# Reflect
 
 Mine the current conversation for durable learnings, then route them into skill edits.
 
