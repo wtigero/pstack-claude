@@ -1,11 +1,12 @@
 # pstack
 
-This fork defaults to one agent on Claude Code and Codex. Delegate independent workstreams or warranted independent review after applying the shared policy. Claude Code also has a session band with Explain, Build, Review, and Hide controls. Use `/pstack-band on` to restore the band. Buttons fill a command draft and preserve your text.
+This fork defaults to one agent on Claude Code and Codex. Delegate independent workstreams or warranted independent review after applying the shared policy. Claude Code also has a session band with Explain, Build, Review, and Hide controls. Use Show pstack to restore the band. Workflow buttons fill a command draft and preserve your text.
 
 Install this distribution in Claude Code with:
 
 ```text
-/plugin install pstack --marketplace wtigero/pstack-claude
+/plugin marketplace add wtigero/pstack-claude
+/plugin install pstack@pstack-wtigero
 ```
 
 Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated skill stack that improves agent outcomes. This is the port for Claude Code, Codex, and other agent harnesses: the same skills, with Cursor primitives translated to each runtime's tools.
