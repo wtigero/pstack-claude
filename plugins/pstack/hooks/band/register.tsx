@@ -16,26 +16,6 @@ async function draft($: EngineInterface, command: string) {
 }
 
 export const register: Register = (on) => {
-  on("session.start", async ($, e, next) => {
-    await $.command.register({
-      name: "pstack-band",
-      description: "Show or hide the pstack session band",
-      argumentHint: "[on|off]",
-      immediate: true,
-    });
-    return next(e);
-  });
-
-  on("command.run", { command: "pstack-band" }, async ($, e) => {
-    const arg = e.args.trim();
-    if (arg && arg !== "on" && arg !== "off") return { text: "Usage: /pstack-band [on|off]" };
-    const state = await read($, band);
-    const visible = arg ? arg === "on" : !state.visible;
-    await update($, band, (s) => ({ ...s, visible }));
-    $.ui.invalidate("ui.render");
-    return { text: `pstack band ${visible ? "on" : "off"}` };
-  });
-
   on("skill.prompt", async ($, e, next) => {
     if (e.pluginName === "pstack" || e.skill.startsWith("pstack:")) {
       await update($, band, (s) => ({ ...s, workflow: e.skill.replace(/^pstack:/, "") }));
@@ -70,15 +50,28 @@ export const register: Register = (on) => {
 
   on("ui.render", { component: "AbovePrompt" }, async ($, e, next) => {
     const state = await read($, band);
-    if (!state.visible || e.props.hasSurvey) return next(e);
+    if (e.props.hasSurvey) return next(e);
     const below = await next(e);
+    const { Box, Text, Button } = $.ui.resolve(e);
+    if (!state.visible) {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <Box flexDirection="row" justifyContent="flex-end">
+            <Button key="show" label="Show pstack" onPress={async () => {
+              await update($, band, (s) => ({ ...s, visible: true }));
+              $.ui.invalidate("ui.render");
+            }} />
+          </Box>
+          {below}
+        </Box>
+      );
+    }
     const [usage, agents] = await Promise.all([
       $.session.usage(),
       $.agent.list(),
     ]);
     const running = agents.filter((agent) => agent.status === "running").length;
     const cost = usage.cost === undefined ? "cost unavailable" : `$${usage.cost.usd.toFixed(2)}`;
-    const { Box, Text, Button } = $.ui.resolve(e);
     return (
       <Box flexDirection="column" gap={1}>
         <Box flexDirection="row" flexWrap="wrap" alignItems="center" justifyContent="space-between" gap={1} borderStyle="round" borderDimColor paddingX={1}>

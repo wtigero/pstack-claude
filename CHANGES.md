@@ -2,6 +2,11 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.107 - Open the session band without a slash command
+
+- Keep the band visible by default and add a Show pstack button after hiding it.
+- Remove the dynamic band command that Desktop can reject before session startup.
+
 ## 0.9.106 - Simplify the Claude Code band
 
 - Align workflow buttons to the right of session status.

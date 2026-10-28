@@ -34,7 +34,7 @@ The band displays session cost when the host provides it and the number of runni
 
 Explain, Build, and Review place `/pstack:how`, `/pstack:poteto-mode`, and `/pstack:interrogate` in the prompt box. Existing draft text remains after the command. Check the draft and press Enter to run it. Buttons disappear while a turn is running. The band yields to host surveys and preserves other mods' output.
 
-Click Hide or run `/pstack-band off` to hide it for this session. Run `/pstack-band on` to show it again. These controls do not change the delegation policy or model routing.
+The band opens automatically when the host starts the session. Click Hide to collapse it, then Show pstack to restore it. Both buttons act locally without submitting a prompt or starting a model turn. These controls do not change the delegation policy or model routing.
 
 The module uses Claude Code's Mods API. It makes no model or network calls and writes no preferences, transcripts, or ledgers itself. Cost is the host's session total, not a subscription invoice. The band is present only where the host renders `AbovePrompt`. Native tests exercise terminal and desktop element trees. The CLI layout also needs a real interactive check when it changes.
 
