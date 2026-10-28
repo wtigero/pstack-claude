@@ -22,6 +22,8 @@ codex plugin add pstack@pstack-wtigero
 
 Restart the host after installation. On Codex, trust the session hook through `/hooks`. Keep your existing runtime-specific model sheet. Claude models belong in the Claude sheet, and Codex models belong in the Codex sheet. This fork does not replace your global instructions or model settings.
 
+For the shared Claude routing policy, apply the [Claude preset](#apply-the-shared-claude-preset) after installing the plugin. Plugin installation and updates do not apply this preset automatically.
+
 For local Claude development, load the checkout for one session:
 
 ```shell
@@ -78,3 +80,44 @@ Each host changes the same four-file CLI in disposable projects. Ordinary work m
 Claude loads this checkout with its user plugin settings disabled. Codex installs this checkout in a private temporary home, reuses the existing login through a temporary link, and copies the model-routing section and the fork's existing hook trust. Temporary homes and project files are removed after each case; reports and transcripts stay in the output directory. Global installations are unchanged. A changed hook that is not already trusted must be reviewed before running these cases.
 
 These are local model-backed smoke checks. They run only when requested and are separate from the offline Bun suite.
+
+## Apply the shared Claude preset
+
+The checked-in [model sheet](../presets/claude/pstack-models.md) is the portable source for this fork's Claude routing policy. The [settings overlay](../presets/claude/settings-overlay.json) sets new sessions to Sonnet at high. These files contain no login data or machine paths.
+
+| Work | Model and effort |
+| --- | --- |
+| Ordinary implementation, refactoring, exploration, explanation, and prose | Sonnet at high |
+| Difficult bugs, performance, architecture, synthesis, independent review, and swarm verification | Opus at xhigh |
+| Exact file, symbol, or configuration lookups | Haiku at low |
+| Specified deterministic transformations, formatting, and fact extraction | Haiku at medium |
+
+Haiku appears only in the bounded-helper policy. It does not fill a worker, investigator, reviewer, verification, or panel role. Start with one agent; a routing entry does not justify delegation.
+
+Use a Claude Code version and account whose model catalog supports these aliases and effort levels. Live probes on Claude Code 2.1.312 resolved Sonnet, Opus, and Haiku to their 5.5 models and passed all four model/effort pairs above. Native child metadata and per-turn request records confirmed the effort, and response records confirmed the model. These were routing checks, not a relative quality benchmark. Aliases can resolve to newer models later.
+
+Run the following from a clone of this repository. Back up the existing model sheet and settings first.
+
+On macOS or Linux:
+
+```sh
+claude_config="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+mkdir -p "$claude_config"
+cp presets/claude/pstack-models.md "$claude_config/pstack-models.md"
+printf '@%s/pstack-models.md\n' "$claude_config"
+```
+
+On Windows PowerShell:
+
+```powershell
+$claudeConfig = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME '.claude' }
+New-Item -ItemType Directory -Force -Path $claudeConfig | Out-Null
+Copy-Item presets/claude/pstack-models.md (Join-Path $claudeConfig 'pstack-models.md')
+"@$claudeConfig/pstack-models.md"
+```
+
+Add the printed `@` line to `CLAUDE.md` in that config directory if it does not already include this sheet. Preserve the existing instructions. Merge the two keys from `settings-overlay.json` into that directory's `settings.json`; do not replace the settings file with the overlay. Other settings and plugin enablement stay machine-specific.
+
+Start a new session. Confirm its default model is Sonnet at high and that the model sheet is loaded. A project override or command-line model/effort flag can take precedence, so check those when a machine differs. The role sheet selects models for delegated work; it does not switch the owner session's running model automatically. A coupled hard task needs the owner's model changed through the host's controls, rather than an unnecessary helper.
+
+To keep machines aligned, update the clone and reapply these two preset files when this policy changes. Codex keeps its separate model sheet.
