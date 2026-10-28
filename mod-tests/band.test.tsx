@@ -15,8 +15,8 @@ const SITE = {
   },
 } as const;
 
-function host(on, { agents = [], cost = 1.25, model = "claude-test", draft = "" } = {}) {
-  on("session.model", () => ({ value: typeof model === "function" ? model() : model }));
+function host(on, { agents = [], cost = 1.25, draft = "" } = {}) {
+  on("session.model", () => ({ value: "claude-test" }));
   on("session.usage", () => ({ value: { context: {}, rateLimits: [], ...(cost === null ? {} : { cost: { usd: cost } }) } }));
   on("agent.list", () => ({ value: agents }));
   on("prompt.read", () => ({ value: { text: draft, cursor: draft.length } }));
@@ -30,6 +30,7 @@ for (const surface of ["terminal", "desktop"] as const) {
     expect(await ui.find({ type: "Text", text: "$1.25" })).toBeDefined();
     expect(await ui.find({ type: "Text", text: "one agent" })).toBeDefined();
     expect(await ui.find({ type: "Text", text: "another mod" })).toBeDefined();
+    expect(await ui.find({ type: "Text", text: "claude-test" })).toBeUndefined();
     await ui.unmount();
   });
 }
@@ -94,31 +95,6 @@ test("tracks pstack skill expansion without changing its prompt", async ($, on) 
   expect(result.text).toBe("design contract");
   const ui = await $.ui.mount({ ...SITE, surface: "terminal" });
   expect(await ui.find({ type: "Text", text: "architect" })).toBeDefined();
-});
-
-test("observes main model effort while passing the model stream unchanged", async ($, on) => {
-  host(on);
-  on("turn.step", async function* ($, e) {
-    yield { kind: "text", index: 0, text: "ok" };
-    return { turnId: e.turnId, index: e.index, answer: "ok", toolUses: [], stopReason: "end_turn", usage: null };
-  });
-  const stream = $.turn.step({ turnId: "t", index: 0, model: "claude-test", effort: "high", messageCount: 1 });
-  expect((await stream.next()).value.text).toBe("ok");
-  expect((await stream.next()).value.answer).toBe("ok");
-  const ui = await $.ui.mount({ ...SITE, surface: "terminal" });
-  expect(await ui.find({ type: "Text", text: "claude-test @high" })).toBeDefined();
-});
-
-
-test("refreshes the idle model after the host switches it", async ($, on) => {
-  let model = "claude-test";
-  host(on, { model: () => model });
-  on("classic.PostModelSwitch", () => ({}));
-  const ui = await $.ui.mount({ ...SITE, surface: "terminal" });
-  expect(await ui.find({ type: "Text", text: "claude-test" })).toBeDefined();
-  model = "claude-other";
-  await $.classic.PostModelSwitch({ from_model: "claude-test", to_model: model, requested_model: model, source: "command" });
-  expect(await ui.find({ type: "Text", text: "claude-other" })).toBeDefined();
 });
 
 test("refreshes helper status when a subagent stops", async ($, on) => {

@@ -30,7 +30,7 @@ claude --plugin-dir ./plugins/pstack
 
 ## Use the session band
 
-The band displays the current session model, the last observed effort for that model, session cost when the host provides it, and the number of running helpers. The workflow label is the last pstack skill expanded in this session. It does not certify verification or independent review.
+The band displays session cost when the host provides it and the number of running helpers. The workflow label is the last pstack skill expanded in this session. Status stays on the left and workflow buttons sit on the right, wrapping when space is narrow. It does not certify verification or independent review.
 
 Explain, Build, and Review place `/pstack:how`, `/pstack:poteto-mode`, and `/pstack:interrogate` in the prompt box. Existing draft text remains after the command. Check the draft and press Enter to run it. Buttons disappear while a turn is running. The band yields to host surveys and preserves other mods' output.
 

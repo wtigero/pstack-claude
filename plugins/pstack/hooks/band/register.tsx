@@ -2,7 +2,7 @@ import { atom, read, update } from "claude-code";
 import type { EngineInterface, Register } from "claude-code";
 import type { Band } from "./types";
 
-const INITIAL: Band = { visible: true, workflow: "ready", model: "", effort: "" };
+const INITIAL: Band = { visible: true, workflow: "ready" };
 const band = atom({ plugin: "pstack", key: "band" } as const, INITIAL);
 const WORKFLOWS = [
   { key: "how", label: "Explain", command: "/pstack:how" },
@@ -44,23 +44,8 @@ export const register: Register = (on) => {
     return next(e);
   });
 
-  on("turn.step", async function* ($, e, next) {
-    if (!e.agentId) {
-      await update($, band, (s) => ({ ...s, model: e.model, effort: String(e.effort ?? "") }));
-      $.ui.invalidate("ui.render");
-    }
-    return yield* next(e);
-  });
-
   on("turn.complete", async ($, e, next) => {
     const result = await next(e);
-    $.ui.invalidate("ui.render");
-    return result;
-  });
-
-  on("classic.PostModelSwitch", async ($, e, next) => {
-    const result = await next(e);
-    await update($, band, (s) => ({ ...s, model: "", effort: "" }));
     $.ui.invalidate("ui.render");
     return result;
   });
@@ -87,27 +72,24 @@ export const register: Register = (on) => {
     const state = await read($, band);
     if (!state.visible || e.props.hasSurvey) return next(e);
     const below = await next(e);
-    const [model, usage, agents] = await Promise.all([
-      $.session.model(),
+    const [usage, agents] = await Promise.all([
       $.session.usage(),
       $.agent.list(),
     ]);
     const running = agents.filter((agent) => agent.status === "running").length;
     const cost = usage.cost === undefined ? "cost unavailable" : `$${usage.cost.usd.toFixed(2)}`;
-    const effort = state.model === model && state.effort ? ` @${state.effort}` : "";
     const { Box, Text, Button } = $.ui.resolve(e);
     return (
       <Box flexDirection="column" gap={1}>
-        <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
+        <Box flexDirection="row" flexWrap="wrap" alignItems="center" justifyContent="space-between" gap={1} borderStyle="round" borderDimColor paddingX={1}>
           <Box flexDirection="row" flexWrap="wrap" alignItems="center" gap={2}>
             <Text bold color="cyan">pstack</Text>
             <Text>{e.props.isWorking ? "working" : state.workflow}</Text>
-            <Text dimColor>{model}{effort}</Text>
             <Text>{cost}</Text>
             <Text>{running ? `${running} helper${running === 1 ? "" : "s"} running` : "one agent"}</Text>
           </Box>
           {!e.props.isWorking && (
-            <Box flexDirection="row" flexWrap="wrap" gap={1}>
+            <Box flexDirection="row" flexWrap="wrap" justifyContent="flex-end" flexGrow={1} gap={1}>
               {WORKFLOWS.map((workflow) => (
                 <Button key={workflow.key} label={workflow.label} onPress={() => draft($, workflow.command)} />
               ))}

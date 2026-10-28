@@ -2,6 +2,11 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.106 - Simplify the Claude Code band
+
+- Align workflow buttons to the right of session status.
+- Remove the model and effort display and its unused state tracking.
+
 ## 0.9.105 - Separate the Claude Code band from other Mods
 
 - Give the pstack band its own border and spacing when composed with another Mod.
