@@ -2,6 +2,11 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.108 - Keep delegation deliberate throughout the playbooks
+
+- Require justification for delegation in feature planning and internal fan-out.
+- Add an opt-in local behavior check for ordinary work and required independent review on Claude Code and Codex.
+
 ## 0.9.107 - Open the session band without a slash command
 
 - Keep the band visible by default and add a Show pstack button after hiding it.
