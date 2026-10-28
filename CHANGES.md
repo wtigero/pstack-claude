@@ -2,6 +2,11 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.105 - Separate the Claude Code band from other Mods
+
+- Give the pstack band its own border and spacing when composed with another Mod.
+- Wrap status and workflow controls when the prompt area is narrow.
+
 ## 0.9.104 - Single-agent workflows and Claude Code band
 
 - Default shared Claude Code and Codex workflows to one agent, with explicit delegation gates and independent review when warranted.

@@ -97,25 +97,27 @@ export const register: Register = (on) => {
     const effort = state.model === model && state.effort ? ` @${state.effort}` : "";
     const { Box, Text, Button } = $.ui.resolve(e);
     return (
-      <Box flexDirection="column">
-        <Box flexDirection="row" gap={1}>
-          <Text bold color="cyan">pstack</Text>
-          <Text>{e.props.isWorking ? "working" : state.workflow}</Text>
-          <Text dimColor>{model}{effort}</Text>
-          <Text>{cost}</Text>
-          <Text>{running ? `${running} helper${running === 1 ? "" : "s"} running` : "one agent"}</Text>
-        </Box>
-        {!e.props.isWorking && (
-          <Box flexDirection="row" gap={1}>
-            {WORKFLOWS.map((workflow) => (
-              <Button key={workflow.key} label={workflow.label} onPress={() => draft($, workflow.command)} />
-            ))}
-            <Button key="hide" label="Hide" onPress={async () => {
-              await update($, band, (s) => ({ ...s, visible: false }));
-              $.ui.invalidate("ui.render");
-            }} />
+      <Box flexDirection="column" gap={1}>
+        <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
+          <Box flexDirection="row" flexWrap="wrap" alignItems="center" gap={2}>
+            <Text bold color="cyan">pstack</Text>
+            <Text>{e.props.isWorking ? "working" : state.workflow}</Text>
+            <Text dimColor>{model}{effort}</Text>
+            <Text>{cost}</Text>
+            <Text>{running ? `${running} helper${running === 1 ? "" : "s"} running` : "one agent"}</Text>
           </Box>
-        )}
+          {!e.props.isWorking && (
+            <Box flexDirection="row" flexWrap="wrap" gap={1}>
+              {WORKFLOWS.map((workflow) => (
+                <Button key={workflow.key} label={workflow.label} onPress={() => draft($, workflow.command)} />
+              ))}
+              <Button key="hide" label="Hide" onPress={async () => {
+                await update($, band, (s) => ({ ...s, visible: false }));
+                $.ui.invalidate("ui.render");
+              }} />
+            </Box>
+          )}
+        </Box>
         {below}
       </Box>
     );
