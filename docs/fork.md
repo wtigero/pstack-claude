@@ -62,3 +62,19 @@ claude plugin validate plugins/pstack
 The band test command requires Claude Code 2.1.311 or later. It stages the actual manifest and hooks in a temporary directory, runs Claude's own test kit, and removes the directory. Staging keeps Claude's recursive test discovery from trying to execute the unrelated vendored Bun tests as Mods tests.
 
 Keep upstream-derived edits in `tools/forks.json`, regenerate committed copies, and run the pinned sync dry runs before updating this fork. Do not edit installed plugin caches.
+
+## Check delegation behavior locally
+
+Run the ordinary-work and required-review cases after changing delegation instructions:
+
+```shell
+bun tools/check-delegation.mjs --live --output /tmp/pstack-delegation
+```
+
+Without `--live`, the command prints usage and makes no model calls. Use `--runtime claude` or `--runtime codex` for one host, and `--scenario ordinary` or `--scenario required-review` for one case. `CLAUDE_BIN` and `CODEX_BIN` select the installed executables. The candidates use Sonnet at high and Sol at high respectively; reviewers follow the runtime's model sheet.
+
+Each host changes the same four-file CLI in disposable projects. Ordinary work must use no helper. A project with an explicit review requirement must invoke one separate read-only reviewer. The runner checks resulting CLI behavior, workflow loading, actual delegation, and reviewer completion. Codex's short event stream can omit spawn calls, so the runner also reads its isolated native session records. A blocked review is not counted as a pass. Inspect the transcript for the reviewer's read-only work and findings before accepting a result as independent verification.
+
+Claude loads this checkout with its user plugin settings disabled. Codex installs this checkout in a private temporary home, reuses the existing login through a temporary link, and copies the model-routing section and the fork's existing hook trust. Temporary homes and project files are removed after each case; reports and transcripts stay in the output directory. Global installations are unchanged. A changed hook that is not already trusted must be reviewed before running these cases.
+
+These are local model-backed smoke checks. They run only when requested and are separate from the offline Bun suite.

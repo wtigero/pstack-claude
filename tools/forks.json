@@ -62,13 +62,13 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/bug-fix.md": {
       "kind": "policy",
-      "why": "The reply quotes the decisive failing and passing output trimmed to the assertion and counts, not the whole repro verbatim. Defaults implementation to the main agent and delegates only independent work or warranted review.",
+      "why": "The reply quotes the decisive failing and passing output trimmed to the assertion and counts, not the whole repro verbatim. Defaults investigation and implementation to the main agent; the diagnosis and implementation steps delegate only justified independent work or warranted review.",
       "since": "0.9.10",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/feature.md": {
       "kind": "policy",
-      "why": "Gives every file-writing delegate its own worktree, based on the branch's HEAD when it builds on unmerged commits, and forbids writing in a worktree a delegate still holds. Defaults implementation to the main agent and delegates only independent work or warranted review.",
+      "why": "Gives every file-writing delegate its own worktree, based on the branch's HEAD when it builds on unmerged commits, and forbids writing in a worktree a delegate still holds. Defaults implementation to the main agent; planning and internal fan-out must justify delegation under the shared policy.",
       "since": "0.9.39",
       "upstream": "not-proposed"
     },

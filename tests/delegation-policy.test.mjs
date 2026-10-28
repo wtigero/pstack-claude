@@ -36,6 +36,14 @@ describe("shared delegation policy", () => {
     }
   });
 
+  test("feature planning requires justification for delegation, not for staying with the main agent", () => {
+    const text = read("skills/poteto-mode/playbooks/feature.md");
+    expect(text).not.toContain("If one worker is best, name why.");
+    expect(text).not.toContain("That owner fans out internally after the blocking phase.");
+    expect(text).not.toContain("Spawn a fresh owner rather than chaining interrupts.");
+    expect(text).toContain("Justify any delegation under the shared policy.");
+  });
+
   test("Codex lifecycle hooks cannot load the Claude Mods module", () => {
     const manifest = JSON.parse(read(".codex-plugin/plugin.json"));
     const codexHooks = JSON.parse(read(manifest.hooks));
