@@ -24,13 +24,14 @@ function host(on, { agents = [], cost = 1.25, draft = "" } = {}) {
 }
 
 for (const surface of ["terminal", "desktop"] as const) {
-  test(`shows host usage and composes with other UI on ${surface}`, async ($, on) => {
+  test(`starts visible and composes with other UI on ${surface}`, async ($, on) => {
     host(on);
     const ui = await $.ui.mount({ ...SITE, surface });
     expect(await ui.find({ type: "Text", text: "$1.25" })).toBeDefined();
     expect(await ui.find({ type: "Text", text: "one agent" })).toBeDefined();
     expect(await ui.find({ type: "Text", text: "another mod" })).toBeDefined();
     expect(await ui.find({ type: "Text", text: "claude-test" })).toBeUndefined();
+    expect(await ui.find({ key: "how" })).toBeDefined();
     await ui.unmount();
   });
 }
@@ -58,21 +59,19 @@ for (const [key, command] of [["how", "/pstack:how"], ["poteto-mode", "/pstack:p
   });
 }
 
-test("hides the band and restores it with its command", async ($, on) => {
-  host(on);
-  const ui = await $.ui.mount({ ...SITE, surface: "terminal" });
-  await ui.press({ key: "hide" });
-  expect(await ui.find({ key: "how" })).toBeUndefined();
-  expect((await $.command.run({ command: "pstack-band", args: "on" })).text).toBe("pstack band on");
-  expect(await ui.find({ key: "how" })).toBeDefined();
-});
-
-test("rejects an invalid band command without hiding the band", async ($, on) => {
-  host(on);
-  expect((await $.command.run({ command: "pstack-band", args: "broken" })).text).toBe("Usage: /pstack-band [on|off]");
-  const ui = await $.ui.mount({ ...SITE, surface: "terminal" });
-  expect(await ui.find({ key: "how" })).toBeDefined();
-});
+for (const surface of ["terminal", "desktop"] as const) {
+  test(`hides and restores the band through buttons on ${surface}`, async ($, on) => {
+    host(on);
+    const ui = await $.ui.mount({ ...SITE, surface });
+    await ui.press({ key: "hide" });
+    expect(await ui.find({ key: "how" })).toBeUndefined();
+    expect(await ui.find({ type: "Text", text: "another mod" })).toBeDefined();
+    await ui.press({ key: "show" });
+    expect(await ui.find({ key: "how" })).toBeDefined();
+    expect(await ui.find({ key: "show" })).toBeUndefined();
+    expect(await ui.find({ type: "Text", text: "another mod" })).toBeDefined();
+  });
+}
 
 test("yields to surveys", async ($, on) => {
   host(on);
