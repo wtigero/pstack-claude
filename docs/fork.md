@@ -104,7 +104,7 @@ On macOS or Linux:
 claude_config="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 mkdir -p "$claude_config"
 cp presets/claude/pstack-models.md "$claude_config/pstack-models.md"
-printf '@%s/pstack-models.md\n' "$claude_config"
+printf '%s\n' '@pstack-models.md'
 ```
 
 On Windows PowerShell:
@@ -113,11 +113,17 @@ On Windows PowerShell:
 $claudeConfig = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME '.claude' }
 New-Item -ItemType Directory -Force -Path $claudeConfig | Out-Null
 Copy-Item presets/claude/pstack-models.md (Join-Path $claudeConfig 'pstack-models.md')
-"@$claudeConfig/pstack-models.md"
+'@pstack-models.md'
 ```
 
-Add the printed `@` line to `CLAUDE.md` in that config directory if it does not already include this sheet. Preserve the existing instructions. Merge the two keys from `settings-overlay.json` into that directory's `settings.json`; do not replace the settings file with the overlay. Other settings and plugin enablement stay machine-specific.
+Add the printed `@pstack-models.md` line to `CLAUDE.md` in that config directory if it does not already include this sheet. The import resolves beside `CLAUDE.md`, so a home or config path containing spaces works without escaping. Preserve the existing instructions. See [Claude's import rules](https://code.claude.com/docs/en/memory#import-additional-files).
 
-Start a new session. Confirm its default model is Sonnet at high and that the model sheet is loaded. A project override or command-line model/effort flag can take precedence, so check those when a machine differs. The role sheet selects models for delegated work; it does not switch the owner session's running model automatically. A coupled hard task needs the owner's model changed through the host's controls, rather than an unnecessary helper.
+Merge `model` and the nested `modelSettings.claude-sonnet-5-5.effortLevel` value from `settings-overlay.json` into that directory's `settings.json`. Preserve other model entries, other fields within those entries, and the rest of the settings file. Do not replace the settings file or its whole `modelSettings` map with the overlay. Other settings and plugin enablement stay machine-specific.
+
+A separate live check excluded existing user settings and loaded a relative import from a folder containing spaces. The preset ran Sonnet 5.5 at high with no model or effort flag; a control without the per-model entry ran at medium.
+
+The per-model effort entry is required for user settings on Sonnet 5.5. A top-level user `effortLevel` is a legacy setting and does not set effort for 5.5 models. When the `sonnet` alias resolves to another canonical model, check its supported levels and add the matching per-model entry before treating the preset as applied. See [Claude's effort settings](https://code.claude.com/docs/en/model-config#adjust-effort-level).
+
+Start a new session. Confirm its default model is Sonnet at high and that the model sheet is loaded. A project override or command-line model/effort flag can take precedence, so check those when a machine differs. The role sheet selects models for delegated work; it does not switch the owner session's running model automatically. For a coupled hard task, select Opus and xhigh through the host's controls instead of creating an unnecessary helper.
 
 To keep machines aligned, update the clone and reapply these two preset files when this policy changes. Codex keeps its separate model sheet.
