@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync, copyFileSync, chmodSync, statSync, lstatSync, realpathSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import { dirname, join, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,6 +15,19 @@ const policyStart = "<!-- pstack:policy:start -->";
 const policyEnd = "<!-- pstack:policy:end -->";
 const read = path => existsSync(path) ? readFileSync(path, "utf8") : "";
 const keyOf = line => keys.has(line.split(":")[0]) ? line.split(":")[0] : null;
+const proseOf = text => text.replaceAll("\r\n", "\n").split("\n").filter(line => !keyOf(line)).join("\n").trim();
+// Version 0.9.109 installed this unmarked Claude preset verbatim.
+const legacyClaudePolicy = "8da3b1c5f2066cd2cc815949b4c2676b9483d06958c86ec7412684514a17f3d6";
+
+function canonicalPath(path) {
+  let existing = resolve(path);
+  const missing = [];
+  while (!lstatSync(existing, { throwIfNoEntry: false })) {
+    missing.unshift(basename(existing));
+    existing = dirname(existing);
+  }
+  return join(realpathSync(existing), ...missing);
+}
 
 function managed(text, open, close, body) {
   const opening = text.indexOf(open);
@@ -35,7 +49,9 @@ export function mergeSheet(current, preset) {
   });
   const missing = [...values].filter(([key]) => !seen.has(key)).map(([, line]) => line);
   const policy = preset.split("\n").filter(line => !keyOf(line)).join("\n").replace(/^# [^\n]*\n/, "").trim();
-  let text = current.trim() ? rows.join("\n") : "# pstack model configuration\n";
+  const knownTemplate = !current.includes(policyStart) && (proseOf(current) === proseOf(preset) || createHash("sha256").update(proseOf(current)).digest("hex") === legacyClaudePolicy);
+  let text = current.trim() && !knownTemplate ? rows.join("\n") : "# pstack model configuration\n";
+  if (knownTemplate) { seen.clear(); missing.splice(0, missing.length, ...values.values()); }
   if (missing.length) text = `${text.trimEnd()}${text.trim() ? "\n\n" : ""}${missing.join("\n")}\n`;
   return managed(text, policyStart, policyEnd, policy);
 }
@@ -66,7 +82,8 @@ function deepMerge(current, overlay) {
   return result;
 }
 
-export function planPreset(runtime, configDir) {
+export function planPreset(runtime, configDir, { includeUnchanged = false } = {}) {
+  configDir = canonicalPath(configDir);
   if (!["claude", "codex"].includes(runtime)) throw new Error(`Unsupported preset runtime: ${runtime}`);
   const preset = readFileSync(join(repo, "presets", runtime, "pstack-models.md"), "utf8");
   const sheet = join(configDir, "pstack-models.md");
@@ -79,7 +96,7 @@ export function planPreset(runtime, configDir) {
       if (!value.startsWith("@")) return true;
       const include = value.slice(1).replace(/\\ /g, " ");
       const path = include.startsWith("~/") ? join(homedir(), include.slice(2)) : resolve(configDir, include);
-      return path !== sheet;
+      return (existsSync(path) ? realpathSync(path) : path) !== (existsSync(sheet) ? realpathSync(sheet) : sheet);
     });
     files.push({ path: instructions, content: `${lines.join("\n").trimEnd()}${lines.some(line => line.trim()) ? "\n\n" : ""}@pstack-models.md\n`, label: "relative model-sheet import" });
     const settingsPath = join(configDir, "settings.json");
@@ -93,10 +110,11 @@ export function planPreset(runtime, configDir) {
   } else {
     files.push({ path: instructions, content: mergeInstructions(existing, preset), label: "managed pstack routing and policy" });
   }
-  return files.map(file => {
-    const target = existsSync(file.path) && lstatSync(file.path).isSymbolicLink() ? realpathSync(file.path) : file.path;
+  const planned = files.map(file => {
+    const target = lstatSync(file.path, { throwIfNoEntry: false })?.isSymbolicLink() ? realpathSync(file.path) : file.path;
     return { ...file, configPath: file.path, path: target, runtime, configDir, before: read(target), existed: existsSync(target) };
-  }).filter(file => file.before !== file.content);
+  });
+  return includeUnchanged ? planned : planned.filter(file => file.before !== file.content);
 }
 
 export function applyPlan(files) {
@@ -129,8 +147,9 @@ export function main(args = process.argv.slice(2)) {
   if (!["claude", "codex", "all"].includes(values.runtime)) throw new Error("Runtime must be claude, codex, or all.");
   if (values.runtime === "all" && values["config-dir"]) throw new Error("--config-dir requires one runtime.");
   const runtimes = values.runtime === "all" ? ["claude", "codex"] : [values.runtime];
-  const files = runtimes.flatMap(runtime => planPreset(runtime, resolve(values["config-dir"] || (runtime === "claude" ? process.env.CLAUDE_CONFIG_DIR : process.env.CODEX_HOME) || join(homedir(), runtime === "claude" ? ".claude" : ".codex"))));
-  if (new Set(files.map(file => file.path)).size !== files.length) throw new Error("Runtime configuration files overlap; use separate Claude and Codex homes.");
+  const owned = runtimes.flatMap(runtime => planPreset(runtime, resolve(values["config-dir"] || (runtime === "claude" ? process.env.CLAUDE_CONFIG_DIR : process.env.CODEX_HOME) || join(homedir(), runtime === "claude" ? ".claude" : ".codex")), { includeUnchanged: true }));
+  if (new Set(owned.map(file => file.path)).size !== owned.length) throw new Error("Runtime configuration files overlap; use separate Claude and Codex homes.");
+  const files = owned.filter(file => file.before !== file.content);
   const backups = values.apply ? applyPlan(files) : [];
   console.log(JSON.stringify({ mode: values.apply ? "apply" : "preview", changed: files.map(({ runtime, path, label }) => ({ runtime, path, label })), backups }, null, 2));
 }

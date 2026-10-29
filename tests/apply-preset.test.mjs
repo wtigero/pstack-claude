@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { planPreset, applyPlan } from "../tools/apply-preset.mjs";
+import { planPreset, applyPlan, mergeSheet } from "../tools/apply-preset.mjs";
 
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const cli = join(repo, "tools/apply-preset.mjs");
@@ -40,6 +40,7 @@ test("Claude apply preserves settings and notes, imports once, and is a no-op on
   const instructions = readFileSync(join(root, "CLAUDE.md"), "utf8");
   expect(instructions).toContain("Keep my instructions.");
   expect(instructions).toContain("@other/pstack-models.md");
+  expect(instructions).not.toContain(`@${join(root, "pstack-models.md").replaceAll(" ", "\\ ")}`);
   expect(instructions.split("\n").filter(line => line === "@pstack-models.md")).toHaveLength(1);
   const sheet = readFileSync(join(root, "pstack-models.md"), "utf8");
   expect(sheet).toContain("Keep this custom note.");
@@ -131,3 +132,47 @@ test("symlink targets with the same basename keep distinct backups", () => fixtu
   expect(readFileSync(backups.find(path => path.endsWith("pstack-models.md")), "utf8")).toBe("feature, refactoring: old\n");
   expect(json(backups.find(path => path.endsWith("settings.json")))).toEqual({ custom: true });
 }));
+
+test("an already-applied runtime still owns its sheet during overlap checks", () => fixture(root => {
+  const home = join(root, "shared");
+  expect(invoke(["--runtime", "claude", "--config-dir", home, "--apply"]).status).toBe(0);
+  const before = readFileSync(join(home, "pstack-models.md"), "utf8");
+  const result = invoke(["--runtime", "all", "--apply"], { CLAUDE_CONFIG_DIR: home, CODEX_HOME: home });
+  expect(result.status).toBe(1);
+  expect(readFileSync(join(home, "pstack-models.md"), "utf8")).toBe(before);
+  expect(existsSync(join(home, "AGENTS.md"))).toBe(false);
+}));
+
+test("directory aliases cannot hide overlapping runtime ownership", () => fixture(root => {
+  const alias = join(root, "alias");symlinkSync(root, alias);
+  const home = join(root, "shared"), aliasHome = join(alias, "shared");
+  const result = invoke(["--runtime", "all", "--apply"], { CLAUDE_CONFIG_DIR: home, CODEX_HOME: aliasHome });
+  expect(result.status).toBe(1);
+  expect(existsSync(home)).toBe(false);
+}));
+
+test("dangling instruction links are refused before any file is written", () => fixture(root => {
+  const link = join(root, "CLAUDE.md"), target = join(root, "missing-instructions.md");
+  symlinkSync(target, link);
+  const result = invoke(["--runtime", "claude", "--config-dir", root, "--apply"]);
+  expect(result.status).toBe(1);
+  expect(lstatSync(link).isSymbolicLink()).toBe(true);
+  expect(existsSync(target)).toBe(false);
+  expect(existsSync(join(root, "pstack-models.md"))).toBe(false);
+  expect(existsSync(join(root, "settings.json"))).toBe(false);
+}));
+
+
+test("unmarked canonical presets move into one managed policy without duplication", () => {
+  for (const runtime of ["claude", "codex"]) {
+    const preset = readFileSync(join(repo, "presets", runtime, "pstack-models.md"), "utf8");
+    const merged = mergeSheet(preset, preset);
+    expect(merged.match(/Default to one agent\./g)).toHaveLength(1);
+    expect(mergeSheet(merged, preset)).toBe(merged);
+  }
+  const legacy = readFileSync(join(repo, "presets/claude/pstack-models.md"), "utf8");
+  const updated = legacy.replace("Default to one agent.", "The main agent remains the default owner.");
+  const migrated = mergeSheet(legacy, updated);
+  expect(migrated).not.toContain("Default to one agent.");
+  expect(migrated).toContain("The main agent remains the default owner.");
+});
