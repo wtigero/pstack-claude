@@ -142,7 +142,7 @@ Claude gets one relative `@pstack-models.md` import beside `CLAUDE.md`, so confi
 | Exact lookup helper | Haiku low | Luna low |
 | Specified deterministic helper | Haiku medium | Luna medium |
 
-Codex also keeps the sheet's bounded Terra exceptions. Helper exceptions require justified delegation. Astra is available only when the human explicitly requests it for the current task; it is never an automatic fallback or default panel choice.
+Codex also keeps the sheet's bounded Terra exceptions. Helper exceptions require justified delegation. Astra and fable are available only when the human explicitly requests that model for the current task. Neither is an automatic fallback or default panel choice. A request for one does not authorize the other or change later defaults.
 
 Use a runtime and account that support the configured models and effort levels. Check the native catalog before dispatch. Sonnet 5.5 needs `modelSettings.claude-sonnet-5-5.effortLevel`; a top-level user `effortLevel` is insufficient. When an alias advances, verify the new canonical model and add its matching per-model entry rather than assuming the old key applies. See [Claude effort settings](https://code.claude.com/docs/en/model-config#adjust-effort-level).
 

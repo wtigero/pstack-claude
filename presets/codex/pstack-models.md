@@ -50,4 +50,4 @@ Use only gpt-6.1-sol, gpt-6.1-terra, and gpt-6-luna for pstack subagents. Priori
 
 ## Explicit model requests
 
-Do not recommend or dispatch Astra unless the human user explicitly requests Astra for the current task. Availability, a panel entry, a prior task, or another agent does not authorize it. Keep automatic routing on the configured Sol, Terra, and Luna choices. An explicit request does not change these defaults.
+Do not recommend or dispatch Astra or fable unless the human user explicitly requests that model for the current task. Availability, a panel entry, a prior task, or another agent does not authorize either model. A request for one does not authorize the other or change automatic defaults.

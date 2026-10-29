@@ -88,14 +88,14 @@ suite("pstack on live pi", () => {
   });
 
   test(
-    "panel: three background agents on opus, fable, and sonnet each notify, on their own resolved model",
+    "panel: three background agents on opus, haiku, and sonnet each notify, on their own resolved model",
     async () => {
       await withParent(async (parent) => {
         const from = await parent.run(
           [
             "In this one turn, make exactly three agent tool calls, each with run_in_background true:",
             '1. description "panel-opus", model "opus", prompt "Reply with exactly one word: alpha"',
-            '2. description "panel-fable", model "fable", prompt "Reply with exactly one word: beta"',
+            '2. description "panel-haiku", model "haiku", prompt "Reply with exactly one word: beta"',
             '3. description "panel-sonnet", model "sonnet", prompt "Reply with exactly one word: gamma"',
             "After the calls, reply with exactly one word: started. Reply to each completion notice with exactly one word: noted.",
           ].join("\n"),
@@ -104,7 +104,7 @@ suite("pstack on live pi", () => {
         await parent.idle(from);
         const file = await parent.sessionFile();
 
-        const expected = { "panel-opus": ["opus", "alpha"], "panel-fable": ["fable", "beta"], "panel-sonnet": ["sonnet", "gamma"] };
+        const expected = { "panel-opus": ["opus", "alpha"], "panel-haiku": ["haiku", "beta"], "panel-sonnet": ["sonnet", "gamma"] };
         const notices = parent.notices(from);
         expect(notices).toHaveLength(3);
         const seen = new Set();

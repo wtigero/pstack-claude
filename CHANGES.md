@@ -2,6 +2,11 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.111 - Require direct requests for Astra and fable
+
+- Require a human request for the specific model in the current task across both presets and the shared delegation policy.
+- Remove fable from bundled strongest-judgment and panel defaults while retaining its explicit-use alias.
+
 ## 0.9.110 - Apply portable presets without resetting policy
 
 - Add a shared Codex preset and a preview-first preset applicator for Claude Code and Codex.
