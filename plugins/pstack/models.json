@@ -44,13 +44,13 @@
       },
       "openai": {
         "opus": "openai/gpt-6.1-sol",
-        "fable": "openai/gpt-6-astra",
+        "fable": "openai/gpt-6.1-sol",
         "sonnet": "openai/gpt-6-sol",
         "haiku": "openai/gpt-6-luna"
       },
       "openai-codex": {
         "opus": "openai-codex/gpt-6.1-sol",
-        "fable": "openai-codex/gpt-6-astra",
+        "fable": "openai-codex/gpt-6.1-sol",
         "sonnet": "openai-codex/gpt-6-sol",
         "haiku": "openai-codex/gpt-6-luna"
       }

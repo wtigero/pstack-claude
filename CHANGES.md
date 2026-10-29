@@ -2,6 +2,14 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.110 - Apply portable presets without resetting policy
+
+- Add a shared Codex preset and a preview-first preset applicator for Claude Code and Codex.
+- Preserve policy prose when setup changes model rows, and gate panel delegation explicitly.
+- Require explicit human requests for Astra and remove automatic Pi mappings to it.
+- Separate delegation completion from independent-review evidence in local behavior checks.
+- Document runtime preset support and the two upstream update paths.
+
 ## 0.9.109 - Simplify marketplace naming
 
 - Rename the Claude Code and Codex marketplace to wtigero and display the plugin as pstack.

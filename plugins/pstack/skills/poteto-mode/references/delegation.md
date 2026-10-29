@@ -11,3 +11,5 @@ Use one independent reviewer by default when review is warranted. The reviewer m
 This policy takes precedence over automatic spawn, delegation, and panel instructions elsewhere in pstack, including how, why, architect, arena, feature, bug-fix, reflect, no-comments, and thermos. When delegation is not justified, perform their reasoning and checks sequentially in the main agent. Do not claim independent review or model diversity for a sequential pass. An explicit request for parallel candidates, a swarm, or a review panel supplies that scope, subject to the user's constraints.
 
 Model-routing rows choose a model only after delegation is justified. A configured panel is a pool of available seats, not an instruction to fill them. Do not lower effort for independent review or complex investigation. Runtime-specific model sheets and user instructions take precedence over bundled model defaults.
+
+Astra requires an explicit request from the human user for the current task. Model availability, a panel pool, a previous task, or another agent does not authorize recommending or dispatching it. Do not persist an explicit request into automatic routing defaults.

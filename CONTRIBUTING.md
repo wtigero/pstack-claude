@@ -4,6 +4,16 @@ Thanks for helping out. This repo is a **port**, not an original work: the `skil
 
 [CONTEXT.md](CONTEXT.md) is the glossary for the terms below.
 
+## Update the two upstream sources
+
+This fork has two upstream relationships. Michael Denyer's port supplies runtime adapters and tooling. Cursor supplies shared workflow content through the component pins in `tools/upstream.json`. Running the Cursor sync does not import changes from the port parent.
+
+Before reviewing a port update, fetch `https://github.com/michael-denyer/pstack-claude.git` into a separate remote and inspect its diff from the last accepted port revision. The fork began from port commit `36885ea631d2afd9482cf9333cc4bbc829b3b02d`; record the newly accepted parent revision in the update PR when that changes. Compare runtime fixes, packaging, and tools separately from workflow policy. Keep this fork's presets, explicit-only Astra rule, delegation gate, and Claude band. Do not replace them by copying the parent's tree.
+
+For a Cursor content update, use the existing sync procedure below and keep intentional upstream-derived edits in `tools/forks.json`. `tools/upstream.json` records Cursor component pins, not the port parent revision. Review a dry run before writing a new sync.
+
+After either update, run the generator check, affected tests, and native packaging validation. Run the preset applicator against temporary homes, verify preserved settings and a no-change second application, and inspect the delegation report's review status rather than treating child completion as independent verification. Check the matching host when a runtime adapter changes. These are local checks; this procedure does not add CI infrastructure or apply global configuration automatically.
+
 ## The sync boundary
 
 Upstream owns skill content. This port owns the Cursor-to-Claude-Code translation. It also carries named forks, each declared in [`tools/forks.json`](tools/forks.json) as a `port-feature` (Claude Code, Codex, Pi, GitHub Copilot, or Muse mechanics upstream cannot carry) or a `policy` (a workflow change the port chose to keep).
