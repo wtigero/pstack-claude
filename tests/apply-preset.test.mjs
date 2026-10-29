@@ -59,7 +59,7 @@ test("Codex apply preserves unrelated instructions and converges legacy rows int
   expect(instructions).toContain("## Other rules\nKeep this section.");
   expect(instructions.match(/^feature, refactoring:/gm)).toHaveLength(1);
   expect(instructions).toContain("feature, refactoring: gpt-6.1-sol @high");
-  expect(instructions).toContain("explicitly requests Astra for the current task");
+  expect(instructions).toContain("explicitly requests that model for the current task");
   expect(instructions).not.toMatch(/^session hook:/m);
   expect(readFileSync(join(root, "config.toml"), "utf8")).toBe('model = "my-session-model"\n');
   expect(planPreset("codex", root)).toEqual([]);
@@ -170,7 +170,7 @@ test("unmarked canonical presets move into one managed policy without duplicatio
     expect(merged.match(/Default to one agent\./g)).toHaveLength(1);
     expect(mergeSheet(merged, preset)).toBe(merged);
   }
-  const legacy = readFileSync(join(repo, "presets/claude/pstack-models.md"), "utf8");
+  const legacy = readFileSync(join(repo, "tests/fixtures/claude-preset-0.9.109.md"), "utf8");
   const updated = legacy.replace("Default to one agent.", "The main agent remains the default owner.");
   const migrated = mergeSheet(legacy, updated);
   expect(migrated).not.toContain("Default to one agent.");

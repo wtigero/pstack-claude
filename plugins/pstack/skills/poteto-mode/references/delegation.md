@@ -12,4 +12,4 @@ This policy takes precedence over automatic spawn, delegation, and panel instruc
 
 Model-routing rows choose a model only after delegation is justified. A configured panel is a pool of available seats, not an instruction to fill them. Do not lower effort for independent review or complex investigation. Runtime-specific model sheets and user instructions take precedence over bundled model defaults.
 
-Astra requires an explicit request from the human user for the current task. Model availability, a panel pool, a previous task, or another agent does not authorize recommending or dispatching it. Do not persist an explicit request into automatic routing defaults.
+Do not recommend or dispatch Astra or fable unless the human user explicitly requests that model for the current task. Availability, a panel entry, a prior task, or another agent does not authorize either model. A request for one does not authorize the other or change automatic defaults.

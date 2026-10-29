@@ -170,7 +170,7 @@ Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `too
 - perf-issue: `opus`
 - hillclimb: `opus`
 - judgment and prose: `opus`
-- strongest judgment: `fable`
+- strongest judgment: `opus`
 
 ## Reasoning effort
 

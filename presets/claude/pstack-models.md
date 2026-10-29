@@ -37,3 +37,7 @@ Use Haiku at low only for exact file, symbol, or configuration lookups with expl
 Use Haiku at medium only for deterministic transformations, exact text formatting or boilerplate edits, and extraction of specified facts from logs. The parent checks the output and any diff. Escalate work that needs interpretation to Sonnet, and consequential judgments to Opus.
 
 Haiku does not replace a configured worker, investigator, panel member, reviewer, verification worker, or final decision maker. It must not perform root-cause analysis, architecture, security judgments, or final quality decisions. These helper exceptions still require the delegation gate above.
+
+## Explicit model requests
+
+Do not recommend or dispatch Astra or fable unless the human user explicitly requests that model for the current task. Availability, a panel entry, a prior task, or another agent does not authorize either model. A request for one does not authorize the other or change automatic defaults.

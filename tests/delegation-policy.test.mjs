@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { validateHooks } from "../tools/generate.mjs";
+import { resolveModels, validateHooks } from "../tools/generate.mjs";
 import { walk } from "../tools/validate-skills.mjs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -76,17 +76,23 @@ test("hooks validation rejects a missing or escaping Mods entry point", () => {
   expect(() => validateHooks(JSON.stringify({ hooks: {}, modules: ["./band/register.tsx"] }), { statOf })).not.toThrow();
 });
 
-test("Astra requires a direct human request and is absent from automatic provider mappings", () => {
+test("Astra and fable require a direct current-task request and stay out of automatic routing", () => {
   const policy = read("skills/poteto-mode/references/delegation.md");
-  expect(policy).toContain("Astra requires an explicit request from the human user for the current task.");
+  expect(policy).toContain("Do not recommend or dispatch Astra or fable unless the human user explicitly requests that model for the current task.");
+  expect(policy).toContain("A request for one does not authorize the other or change automatic defaults.");
   const models = JSON.parse(read("models.json"));
-  expect(JSON.stringify(models.codex)).not.toContain("gpt-6-astra");
+  expect(resolveModels(models).roles.flatMap(role => role.models).every(model => !/astra|fable/i.test(model))).toBe(true);
+  expect(JSON.stringify(models.codex)).not.toMatch(/astra|fable/i);
+  expect(models.available).toContain("fable");
+  expect(models.pi.models.anthropic.fable).toBe("anthropic/claude-fable-5-1");
   expect(JSON.stringify(models.pi)).not.toContain("gpt-6-astra");
   for (const runtime of ["claude", "codex"]) {
     const preset = readFileSync(join(plugin, "../../presets", runtime, "pstack-models.md"), "utf8");
     const rows = preset.split("\n").filter(line => models.roles.some(role => line.startsWith(`${role.role}:`)));
     expect(rows).toHaveLength(models.roles.length);
-    expect(rows.every(row => !/astra/i.test(row))).toBe(true);
+    expect(rows.every(row => !/astra|fable/i.test(row))).toBe(true);
+    expect(preset).toContain("Do not recommend or dispatch Astra or fable unless the human user explicitly requests that model for the current task.");
+    expect(preset).toContain("A request for one does not authorize the other or change automatic defaults.");
   }
 });
 
