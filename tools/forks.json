@@ -353,12 +353,6 @@
       "since": "0.9.104",
       "upstream": "not-proposed",
       "why": "Applies the shared single-agent delegation gate before dispatch."
-    },
-    "plugins/pstack/skills/setup-pstack/copilot.md": {
-      "kind": "policy",
-      "why": "Keeps Copilot sheet policy prose during setup and treats panel models as an available pool rather than mandatory fan-out.",
-      "since": "0.9.110",
-      "upstream": "not-proposed"
     }
   },
   "thermos": {
