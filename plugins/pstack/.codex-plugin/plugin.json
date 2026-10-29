@@ -1,6 +1,6 @@
 {
   "name": "pstack",
-  "version": "0.9.108",
+  "version": "0.9.109",
   "description": "If you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence. Codex port of the Claude Code plugin; skills are shared, tool names resolve via skills/poteto-mode/references/codex-tools.md. Original pstack by Lauren Tan (poteto).",
   "author": {
     "name": "wtigero",
@@ -30,7 +30,7 @@
   "skills": "./skills/",
   "hooks": "./hooks/codex-hooks.json",
   "interface": {
-    "displayName": "pstack (wtigero)",
+    "displayName": "pstack",
     "shortDescription": "Single-agent workflows with deliberate parallel work and independent review",
     "longDescription": "pstack shares workflows across Claude Code and Codex. The main agent owns the task by default. Delegate concrete independent workstreams or warranted independent review after applying the shared policy. Model sheets select models only after that decision.",
     "developerName": "Michael Denyer (port of Lauren Tan's pstack)",

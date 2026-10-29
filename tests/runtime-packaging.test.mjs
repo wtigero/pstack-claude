@@ -115,8 +115,11 @@ describe("manifests", () => {
     expect(copilot.version).toBe(claude.version);
     expect(muse.name).toBe(claude.name);
     expect(muse.version).toBe(claude.version);
+    expect(claudeMarketplace.name).toBe("wtigero");
     expect(codexMarketplace.name).toBe(claudeMarketplace.name);
-    expect(codexMarketplace.interface.displayName).toBe(codex.interface.displayName);
+    expect(claude.displayName).toBe("pstack");
+    expect(codex.interface.displayName).toBe("pstack");
+    expect(codexMarketplace.interface.displayName).toBe("wtigero");
     expect(codexMarketplace.plugins.map(({ name, source, category }) => [name, source.path, category])).toEqual([
       [codex.name, claudeMarketplace.plugins[0].source, codex.interface.category],
     ]);

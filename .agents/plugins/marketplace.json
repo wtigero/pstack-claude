@@ -1,7 +1,7 @@
 {
-  "name": "pstack-wtigero",
+  "name": "wtigero",
   "interface": {
-    "displayName": "pstack (wtigero)"
+    "displayName": "wtigero"
   },
   "plugins": [
     {

@@ -12,6 +12,8 @@ For concurrency bugs and invariants that tests cannot reach, `/create-formal-ver
 
 ## Install
 
+For an existing installation, [remove the older pstack distribution first](docs/fork.md#migrate-an-existing-installation).
+
 <details>
 <summary><strong>Claude Code</strong></summary>
 
@@ -19,10 +21,10 @@ Run in Claude Code 2.1.311 or later:
 
 ```text
 /plugin marketplace add wtigero/pstack-claude
-/plugin install pstack@pstack-wtigero
+/plugin install pstack@wtigero
 ```
 
-Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `pstack-wtigero`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@pstack-wtigero`.
+Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `wtigero`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@wtigero`.
 
 </details>
 
@@ -34,7 +36,7 @@ Run in your terminal:
 
 ```shell
 codex plugin marketplace add wtigero/pstack-claude
-codex plugin add pstack@pstack-wtigero
+codex plugin add pstack@wtigero
 ```
 
 </details>
@@ -59,7 +61,7 @@ Run in your terminal:
 
 ```shell
 copilot plugin marketplace add wtigero/pstack-claude
-copilot plugin install pstack@pstack-wtigero
+copilot plugin install pstack@wtigero
 ```
 
 This installs pstack for the Copilot CLI and the GitHub Copilot app, which share `~/.copilot`. Start a new session afterwards. Copilot ships no default pstack models, so the first skill that needs one runs `setup-pstack` to pick from the models your account lists, and later sessions reuse that choice.

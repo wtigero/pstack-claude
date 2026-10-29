@@ -41,7 +41,7 @@
 #   SMOKE_MODEL=gpt-5-mini tests/copilot-smoke.sh
 #   SMOKE_SETUP_MODELS="gpt-5.4-mini claude-sonnet-5" tests/copilot-smoke.sh   # setup probes 5 and 6, once per model
 #   KEEP=1 tests/copilot-smoke.sh     # keep the temp dir; a failed or aborted run always keeps it
-#   SMOKE_GITHUB=michael-denyer/pstack-claude@main tests/copilot-smoke.sh
+#   SMOKE_GITHUB=wtigero/pstack-claude@main tests/copilot-smoke.sh
 set -euo pipefail
 
 if ! command -v copilot >/dev/null 2>&1; then
@@ -126,7 +126,7 @@ full_sheet() {
 # 1. Install from the local checkout; Copilot loads it live, nothing copied.
 skills="$(find "$repo/plugins/pstack/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')"
 copilot plugin marketplace add "$repo" >/dev/null
-install_out="$(copilot plugin install pstack@pstack-claude 2>&1)" || true
+install_out="$(copilot plugin install pstack@wtigero 2>&1)" || true
 if [[ "$install_out" == *"Installed $skills skills"* ]]; then
   pass "install reports all $skills skills"
 else
@@ -134,8 +134,8 @@ else
 fi
 version="$(tr -d '[:space:]' <"$repo/VERSION")"
 list_out="$(copilot plugin list 2>&1)" || true
-if [[ "$list_out" == *"pstack@pstack-claude (v$version) (enabled)"* ]]; then
-  pass "plugin list shows pstack@pstack-claude v$version enabled"
+if [[ "$list_out" == *"pstack@wtigero (v$version) (enabled)"* ]]; then
+  pass "plugin list shows pstack@wtigero v$version enabled"
 else
   fail "plugin list does not show pstack v$version enabled"
 fi
@@ -453,14 +453,14 @@ if [ -n "${SMOKE_GITHUB:-}" ]; then
   no_app_offer "$home"
   export COPILOT_HOME="$home"
   jq -n --arg repo "${SMOKE_GITHUB%@*}" --arg ref "${SMOKE_GITHUB#*@}" \
-    '{extraKnownMarketplaces: {"pstack-claude": {source: {source: "github", repo: $repo, ref: $ref}}}}' >"$home/settings.json"
-  copilot plugin install pstack@pstack-claude >/dev/null 2>&1 || true
-  if [ -e "$home/installed-plugins/pstack-claude/pstack/hooks/pre-tool-use.sh" ]; then
+    '{extraKnownMarketplaces: {"wtigero": {source: {source: "github", repo: $repo, ref: $ref}}}}' >"$home/settings.json"
+  copilot plugin install pstack@wtigero >/dev/null 2>&1 || true
+  if [ -e "$home/installed-plugins/wtigero/pstack/hooks/pre-tool-use.sh" ]; then
     pass "GitHub install copied the plugin under installed-plugins"
-    sandboxed "GitHub install" "$home/installed-plugins/pstack-claude/pstack"
-    script_run "GitHub install" "$home/installed-plugins/pstack-claude/pstack"
+    sandboxed "GitHub install" "$home/installed-plugins/wtigero/pstack"
+    script_run "GitHub install" "$home/installed-plugins/wtigero/pstack"
   else
-    fail "GitHub install of $SMOKE_GITHUB left no hooks/pre-tool-use.sh under $home/installed-plugins/pstack-claude/pstack"
+    fail "GitHub install of $SMOKE_GITHUB left no hooks/pre-tool-use.sh under $home/installed-plugins/wtigero/pstack"
   fi
 fi
 
