@@ -6,7 +6,7 @@ Install this distribution in Claude Code with:
 
 ```text
 /plugin marketplace add wtigero/pstack-claude
-/plugin install pstack@pstack-wtigero
+/plugin install pstack@wtigero
 ```
 
 Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated skill stack that improves agent outcomes. This is the port for Claude Code, Codex, and other agent harnesses: the same skills, with Cursor primitives translated to each runtime's tools.

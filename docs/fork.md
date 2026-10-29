@@ -4,25 +4,53 @@ This fork keeps pstack's shared skills and native packaging for both runtimes. I
 
 ## Install
 
-Disable an existing pstack installation before enabling this fork. Both use the `pstack` skill namespace. The distinct marketplace name identifies this distribution, but does not let both implementations of `/pstack:how` coexist.
+The plugin is named `pstack` and its marketplace is `wtigero`, so the installed identifier is `pstack@wtigero`. Remove an older distribution before enabling this one. All distributions use the same `pstack` skill namespace.
 
 On Claude Code 2.1.311 or later, run:
 
 ```text
 /plugin marketplace add wtigero/pstack-claude
-/plugin install pstack@pstack-wtigero
+/plugin install pstack@wtigero
 ```
 
 On Codex, run:
 
 ```shell
 codex plugin marketplace add wtigero/pstack-claude
-codex plugin add pstack@pstack-wtigero
+codex plugin add pstack@wtigero
 ```
 
 Restart the host after installation. On Codex, trust the session hook through `/hooks`. Keep your existing runtime-specific model sheet. Claude models belong in the Claude sheet, and Codex models belong in the Codex sheet. This fork does not replace your global instructions or model settings.
 
 For the shared Claude routing policy, apply the [Claude preset](#apply-the-shared-claude-preset) after installing the plugin. Plugin installation and updates do not apply this preset automatically.
+
+## Migrate an existing installation
+
+Keep your model sheets and global instructions. Back up the runtime settings before changing plugin registrations. If `pstack@pstack-wtigero`, `pstack@pstack-claude`, or `pstack@pstack` is installed, uninstall it and remove its marketplace before running the install commands above. Run only the commands for entries that your plugin list reports.
+
+On Claude Code:
+
+```shell
+claude plugin uninstall pstack@pstack-wtigero --scope user --keep-data
+claude plugin marketplace remove pstack-wtigero --scope user
+claude plugin uninstall pstack@pstack-claude --scope user --keep-data
+claude plugin marketplace remove pstack-claude --scope user
+claude plugin uninstall pstack@pstack --scope user --keep-data
+claude plugin marketplace remove pstack --scope user
+```
+
+On Codex:
+
+```shell
+codex plugin remove pstack@pstack-wtigero
+codex plugin marketplace remove pstack-wtigero
+codex plugin remove pstack@pstack-claude
+codex plugin marketplace remove pstack-claude
+codex plugin remove pstack@pstack
+codex plugin marketplace remove pstack
+```
+
+Preserve unrelated plugins and settings. Check project and local overrides for older pstack registrations too. After installing `pstack@wtigero`, start a new session and confirm that only this distribution supplies pstack skills and hooks. Codex stores hook trust by installed plugin identifier, so review and trust the new entry through `/hooks`. Remove obsolete pstack hook-state entries after the new hook works. Do not copy a trust hash without checking that the hook content is unchanged.
 
 For local Claude development, load the checkout for one session:
 

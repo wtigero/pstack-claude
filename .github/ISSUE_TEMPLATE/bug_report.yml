@@ -62,7 +62,7 @@ body:
       label: Steps to reproduce
       description: Numbered steps that start from a fresh session. Give each command as you typed it.
       placeholder: |
-        1. /plugin install pstack@pstack-claude
+        1. /plugin install pstack@wtigero
         2. Start a new session and type ...
         3. ...
     validations:

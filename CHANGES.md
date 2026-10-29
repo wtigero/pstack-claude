@@ -2,6 +2,12 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.109 - Simplify marketplace naming
+
+- Rename the Claude Code and Codex marketplace to wtigero and display the plugin as pstack.
+- Update installation commands and the local delegation checker for pstack@wtigero.
+- Document removing older distributions while keeping model sheets and unrelated settings.
+
 ## 0.9.108 - Keep delegation deliberate throughout the playbooks
 
 - Require justification for delegation in feature planning and internal fan-out.

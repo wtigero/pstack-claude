@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const cases = ["ordinary", "required-review"];
-const hookKey = "pstack@pstack-wtigero:hooks/codex-hooks.json:session_start:0:0";
+const hookKey = "pstack@wtigero:hooks/codex-hooks.json:session_start:0:0";
 
 export function delegationCalls(records, runtime) {
   const sessions = records.filter(record => record.type === "pstack.session");
@@ -140,7 +140,7 @@ function prepareCodexHome(home, bin) {
   }
   const env = { ...process.env, CODEX_HOME: home };
   command(bin, ["plugin", "marketplace", "add", repo, "--json"], repo, env);
-  command(bin, ["plugin", "add", "pstack@pstack-wtigero", "--json"], repo, env);
+  command(bin, ["plugin", "add", "pstack@wtigero", "--json"], repo, env);
   return env;
 }
 
