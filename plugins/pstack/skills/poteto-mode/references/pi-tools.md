@@ -52,7 +52,7 @@ Skills name models by the Claude aliases in their Models sections. On Pi, pass t
 | Alias | `anthropic` | `openai` | `openai-codex` |
 | --- | --- | --- | --- |
 | `opus` | `anthropic/claude-opus-5-5` | `openai/gpt-6.1-sol` | `openai-codex/gpt-6.1-sol` |
-| `fable` | `anthropic/claude-fable-5-1` | `openai/gpt-6-astra` | `openai-codex/gpt-6-astra` |
+| `fable` | `anthropic/claude-fable-5-1` | `openai/gpt-6.1-sol` | `openai-codex/gpt-6.1-sol` |
 | `sonnet` | `anthropic/claude-sonnet-5-5` | `openai/gpt-6-sol` | `openai-codex/gpt-6-sol` |
 | `haiku` | `anthropic/claude-haiku-5-5` | `openai/gpt-6-luna` | `openai-codex/gpt-6-luna` |
 

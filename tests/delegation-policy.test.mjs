@@ -75,3 +75,29 @@ test("hooks validation rejects a missing or escaping Mods entry point", () => {
   }
   expect(() => validateHooks(JSON.stringify({ hooks: {}, modules: ["./band/register.tsx"] }), { statOf })).not.toThrow();
 });
+
+test("Astra requires a direct human request and is absent from automatic provider mappings", () => {
+  const policy = read("skills/poteto-mode/references/delegation.md");
+  expect(policy).toContain("Astra requires an explicit request from the human user for the current task.");
+  const models = JSON.parse(read("models.json"));
+  expect(JSON.stringify(models.codex)).not.toContain("gpt-6-astra");
+  expect(JSON.stringify(models.pi)).not.toContain("gpt-6-astra");
+  for (const runtime of ["claude", "codex"]) {
+    const preset = readFileSync(join(plugin, "../../presets", runtime, "pstack-models.md"), "utf8");
+    const rows = preset.split("\n").filter(line => models.roles.some(role => line.startsWith(`${role.role}:`)));
+    expect(rows).toHaveLength(models.roles.length);
+    expect(rows.every(row => !/astra/i.test(row))).toBe(true);
+  }
+});
+
+test("setup preserves policy prose and treats panels as pools", () => {
+  const setup = read("skills/setup-pstack/SKILL.md");
+  expect(setup).not.toContain("Overwrite the whole file");
+  expect(setup).not.toContain("the list length sets the count");
+  expect(setup).toContain("Preserve all other prose");
+  expect(setup).toContain("a list entry does not require a spawn");
+  expect(setup).toContain("@pstack-models.md");
+  const copilot = read("skills/setup-pstack/copilot.md");
+  expect(copilot).not.toContain("panels run one subagent per model");
+  expect(copilot).toContain("preserving policy prose");
+});

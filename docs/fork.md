@@ -22,7 +22,7 @@ codex plugin add pstack@wtigero
 
 Restart the host after installation. On Codex, trust the session hook through `/hooks`. Keep your existing runtime-specific model sheet. Claude models belong in the Claude sheet, and Codex models belong in the Codex sheet. This fork does not replace your global instructions or model settings.
 
-For the shared Claude routing policy, apply the [Claude preset](#apply-the-shared-claude-preset) after installing the plugin. Plugin installation and updates do not apply this preset automatically.
+Apply the [shared presets](#apply-the-shared-presets) after installing the plugin. Plugin installation and updates do not apply presets automatically.
 
 ## Migrate an existing installation
 
@@ -103,55 +103,61 @@ bun tools/check-delegation.mjs --live --output /tmp/pstack-delegation
 
 Without `--live`, the command prints usage and makes no model calls. Use `--runtime claude` or `--runtime codex` for one host, and `--scenario ordinary` or `--scenario required-review` for one case. `CLAUDE_BIN` and `CODEX_BIN` select the installed executables. The candidates use Sonnet at high and Sol at high respectively; reviewers follow the runtime's model sheet.
 
-Each host changes the same four-file CLI in disposable projects. Ordinary work must use no helper. A project with an explicit review requirement must invoke one separate read-only reviewer. The runner checks resulting CLI behavior, workflow loading, actual delegation, and reviewer completion. Codex's short event stream can omit spawn calls, so the runner also reads its isolated native session records. A blocked review is not counted as a pass. Inspect the transcript for the reviewer's read-only work and findings before accepting a result as independent verification.
+Each host changes the same four-file CLI in disposable projects. Ordinary work must use no helper. A project with an explicit review requirement must invoke one separate read-only reviewer. The runner checks resulting CLI behavior, workflow loading, actual delegation, and reviewer completion. Codex's short event stream can omit spawn calls, so the runner also reads its isolated native session records. A blocked review is not counted as a pass. The report separates `delegationPassed` from `review.status`. A completed child and a read-only brief leave the review `unverified`; an implementer, a file-mutation tool, or nested delegation rejects the review. Native evidence retains the brief, tool names, and applied model/effort context without copying tool arguments or hidden outputs. Shell tool names alone cannot prove that no files changed. Inspect the transcript and findings independently before accepting the review.
+
+Exit 0 means the automatic checks passed. Exit 2 means the fixture and delegation checks passed but independent transcript inspection is still required. Exit 1 means a failed check or rejected/incomplete review. Required-review cases never become an automatic pass from prompt wording or child completion.
 
 Claude loads this checkout with its user plugin settings disabled. Codex installs this checkout in a private temporary home, reuses the existing login through a temporary link, and copies the model-routing section and the fork's existing hook trust. Temporary homes and project files are removed after each case; reports and transcripts stay in the output directory. Global installations are unchanged. A changed hook that is not already trusted must be reviewed before running these cases.
 
 These are local model-backed smoke checks. They run only when requested and are separate from the offline Bun suite.
 
-## Apply the shared Claude preset
+## Apply the shared presets
 
-The checked-in [model sheet](../presets/claude/pstack-models.md) is the portable source for this fork's Claude routing policy. The [settings overlay](../presets/claude/settings-overlay.json) sets new sessions to Sonnet at high. These files contain no login data or machine paths.
+The checked-in sheets in [presets/claude](../presets/claude/pstack-models.md) and [presets/codex](../presets/codex/pstack-models.md) define the shared routing policies. The [Claude settings overlay](../presets/claude/settings-overlay.json) sets new Claude sessions to Sonnet at high. The Codex preset sets role routing; it preserves the session model and effort in Codex's configuration. A role sheet does not change an owner session that is already running.
 
-| Work | Model and effort |
-| --- | --- |
-| Ordinary implementation, refactoring, exploration, explanation, and prose | Sonnet at high |
-| Difficult bugs, performance, architecture, synthesis, independent review, and swarm verification | Opus at xhigh |
-| Exact file, symbol, or configuration lookups | Haiku at low |
-| Specified deterministic transformations, formatting, and fact extraction | Haiku at medium |
+Run from a clone of this repository with Node.js installed. Preview both runtimes first:
 
-Haiku appears only in the bounded-helper policy. It does not fill a worker, investigator, reviewer, verification, or panel role. Start with one agent; a routing entry does not justify delegation.
-
-Use a Claude Code version and account whose model catalog supports these aliases and effort levels. Live probes on Claude Code 2.1.312 resolved Sonnet, Opus, and Haiku to their 5.5 models and passed all four model/effort pairs above. Native child metadata and per-turn request records confirmed the effort, and response records confirmed the model. These were routing checks, not a relative quality benchmark. Aliases can resolve to newer models later.
-
-Run the following from a clone of this repository. Back up the existing model sheet and settings first.
-
-On macOS or Linux:
-
-```sh
-claude_config="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-mkdir -p "$claude_config"
-cp presets/claude/pstack-models.md "$claude_config/pstack-models.md"
-printf '%s\n' '@pstack-models.md'
+```shell
+node tools/apply-preset.mjs --runtime all
 ```
 
-On Windows PowerShell:
+Apply the previewed preset inputs:
 
-```powershell
-$claudeConfig = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME '.claude' }
-New-Item -ItemType Directory -Force -Path $claudeConfig | Out-Null
-Copy-Item presets/claude/pstack-models.md (Join-Path $claudeConfig 'pstack-models.md')
-'@pstack-models.md'
+```shell
+node tools/apply-preset.mjs --runtime all --apply
 ```
 
-Add the printed `@pstack-models.md` line to `CLAUDE.md` in that config directory if it does not already include this sheet. The import resolves beside `CLAUDE.md`, so a home or config path containing spaces works without escaping. Preserve the existing instructions. See [Claude's import rules](https://code.claude.com/docs/en/memory#import-additional-files).
+Use `--runtime claude` or `--runtime codex` for one host. For an explicit directory, use `--runtime claude --config-dir "/path with spaces"`. Without that option, Claude uses `CLAUDE_CONFIG_DIR` or its default user config directory; Codex uses `CODEX_HOME` or its default user home. The same Node command works in macOS/Linux shells and Windows PowerShell.
 
-Merge `model` and the nested `modelSettings.claude-sonnet-5-5.effortLevel` value from `settings-overlay.json` into that directory's `settings.json`. Preserve other model entries, other fields within those entries, and the rest of the settings file. Do not replace the settings file or its whole `modelSettings` map with the overlay. Other settings and plugin enablement stay machine-specific.
+Preview lists the target files and owned fields without printing existing settings or secrets. It creates no directories. Apply backs up existing changed files under that runtime's `.pstack-backups` directory with private permissions, then writes only changed files. All inputs are planned before any write. Invalid JSON or malformed managed markers aborts planning. Repeating the same apply produces no changes or new backups. A partial write can be retried using the existing state; backups remain available for recovery.
 
-A separate live check excluded existing user settings and loaded a relative import from a folder containing spaces. The preset ran Sonnet 5.5 at high with no model or effort flag; a control without the per-model entry ran at medium.
+The applicator updates recognized model rows and preserves custom sheet prose. Shared policy lives in a marked block. Codex instructions receive one marked preset block; legacy model rows under the pstack routing heading move into that block, while other instructions and notes remain. Custom instructions outside managed blocks stay user-owned and can override the preset. Review those overrides when machines differ. Do not hand-edit managed blocks; update the preset source and reapply it.
 
-The per-model effort entry is required for user settings on Sonnet 5.5. A top-level user `effortLevel` is a legacy setting and does not set effort for 5.5 models. When the `sonnet` alias resolves to another canonical model, check its supported levels and add the matching per-model entry before treating the preset as applied. See [Claude's effort settings](https://code.claude.com/docs/en/model-config#adjust-effort-level).
+Claude gets one relative `@pstack-models.md` import beside `CLAUDE.md`, so config paths containing spaces work. Other imports remain. Settings are deep-merged at the overlay's leaves; other model entries, fields, plugins, and permissions remain. No plugin cache, login file, or Codex configuration is rewritten. Plugin registration and hook trust still use the native CLIs.
 
-Start a new session. Confirm its default model is Sonnet at high and that the model sheet is loaded. A project override or command-line model/effort flag can take precedence, so check those when a machine differs. The role sheet selects models for delegated work; it does not switch the owner session's running model automatically. For a coupled hard task, select Opus and xhigh through the host's controls instead of creating an unnecessary helper.
+| Work | Claude Code | Codex |
+| --- | --- | --- |
+| Ordinary implementation, refactoring, exploration, explanation, and prose | Sonnet high | Sol high |
+| Difficult bugs, performance, architecture, synthesis, independent review, and verification | Opus xhigh | Sol xhigh |
+| Exact lookup helper | Haiku low | Luna low |
+| Specified deterministic helper | Haiku medium | Luna medium |
 
-To keep machines aligned, update the clone and reapply these two preset files when this policy changes. Codex keeps its separate model sheet.
+Codex also keeps the sheet's bounded Terra exceptions. Helper exceptions require justified delegation. Astra is available only when the human explicitly requests it for the current task; it is never an automatic fallback or default panel choice.
+
+Use a runtime and account that support the configured models and effort levels. Check the native catalog before dispatch. Sonnet 5.5 needs `modelSettings.claude-sonnet-5-5.effortLevel`; a top-level user `effortLevel` is insufficient. When an alias advances, verify the new canonical model and add its matching per-model entry rather than assuming the old key applies. See [Claude effort settings](https://code.claude.com/docs/en/model-config#adjust-effort-level).
+
+Start a fresh session after applying. Check the loaded sheet and native settings. If a project override or CLI flag differs, report it. Do not claim a model or effort was applied from a self-report. The earlier Claude 2.1.312 probes confirmed the four Claude pairs through actual response and request metadata; those results are routing checks, not quality benchmarks or proof for another machine.
+
+## Runtime preset support
+
+| Runtime | Packaging | Shared preset in this fork |
+| --- | --- | --- |
+| Claude Code | Native plugin and Mods band | Claude sheet, relative import, settings overlay, and applicator |
+| Codex | Native plugin and lifecycle hook | Codex sheet, managed instructions, and applicator |
+| Pi | Native package and extension | Runtime setup with provider-specific model IDs; no portable preset claimed |
+| GitHub Copilot CLI/app | Native plugin | Runtime setup against its available model enum; no portable preset claimed |
+| Muse | Native plugin | Runtime setup against its model catalog; no portable preset claimed |
+| opencode and Gemini CLI | Shared skills installation | Runtime-specific instructions and setup; no live preset verification claimed |
+| Prime Agent | Shared skills installation | No documented portable sheet path or verified preset |
+
+The shared skills do not make model IDs or effort controls interchangeable. Add another preset only after checking that runtime's catalog, configuration precedence, and native behavior. Keep its support level explicit.

@@ -1,6 +1,6 @@
 # pstack
 
-This is [wtigero's fork](https://github.com/wtigero/pstack-claude) of [Michael Denyer's port](https://github.com/michael-denyer/pstack-claude). Claude Code and Codex share a single-agent default. Delegate only independent workstreams or warranted independent review. Claude Code also gets a session band with workflow buttons. See [fork setup and verification](docs/fork.md).
+This is [wtigero's fork](https://github.com/wtigero/pstack-claude) of [Michael Denyer's port](https://github.com/michael-denyer/pstack-claude). Claude Code and Codex share a single-agent default. Delegate only independent workstreams or warranted independent review. Claude Code also gets a session band with workflow buttons. See [fork setup and verification](docs/fork.md), including the shared Claude Code and Codex presets.
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/codenyer)
 

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const cases = ["ordinary", "required-review"];
+const writeTools = new Set(["apply_patch", "Edit", "Write", "NotebookEdit"]);
 const hookKey = "pstack@wtigero:hooks/codex-hooks.json:session_start:0:0";
 
 export function delegationCalls(records, runtime) {
@@ -33,14 +34,29 @@ export function delegationCalls(records, runtime) {
       calls.set(item.id, { id: item.id, prompt: item.prompt ?? "", parent: item.sender_thread_id ?? null });
     }
   }
+  for (const record of records.filter(record => record.type === "assistant" && record.parent_tool_use_id)) {
+    const owner = calls.get(record.parent_tool_use_id);
+    if (!owner) continue;
+    const names = (record.message?.content ?? []).filter(block => block.type === "tool_use").map(block => block.name);
+    owner.toolNames = [...new Set([...(owner.toolNames ?? []), ...names])];
+    owner.wroteFiles ||= names.some(name => writeTools.has(name));
+  }
   return [...calls.values()];
 }
 
 export function checkDelegation(records, runtime, scenario) {
   const calls = delegationCalls(records, runtime);
   const expected = scenario === "ordinary" ? 0 : 1;
-  const completedReview = calls.length === 1 && calls[0].completed === true && (runtime === "codex" || /review/i.test(calls[0].prompt) && /read.only|do not (?:edit|modify|change)/i.test(calls[0].prompt));
-  return { passed: calls.length === expected && (expected === 0 || completedReview), calls, expected };
+  const delegationPassed = calls.length === expected && (expected === 0 || calls[0].completed === true);
+  let review = { status: "not-required", reason: "This case requires no helper." };
+  if (expected) {
+    if (calls.length > 1) review = { status: "rejected", reason: "The case requires exactly one separate reviewer with no nested delegation." };
+    else if (!delegationPassed) review = { status: "incomplete", reason: "A separate completed reviewer is missing." };
+    else if (calls[0].wroteFiles) review = { status: "rejected", reason: "The child invoked a file mutation tool." };
+    else if (calls[0].prompt && !(/review/i.test(calls[0].prompt) && /read.only|do not (?:edit|modify|change)/i.test(calls[0].prompt))) review = { status: "rejected", reason: "The child brief does not request a read-only review." };
+    else review = { status: "unverified", reason: "Inspect the child transcript and findings independently; completion and brief wording do not prove a read-only review." };
+  }
+  return { passed: delegationPassed && expected === 0, delegationPassed, review, calls, expected };
 }
 
 export function codexSessionEvidence(groups) {
@@ -48,9 +64,18 @@ export function codexSessionEvidence(groups) {
     const meta = records.find(record => record.type === "session_meta").payload;
     const parent = meta.source?.subagent?.thread_spawn?.parent_thread_id ?? null;
     if (parent === null && meta.source !== "exec") throw new Error("Unsupported native session source; delegation cannot be verified.");
+    const messages = records.flatMap(record => {
+      if (record.type === "event_msg" && record.payload.type === "user_message") return [record.payload.message];
+      if (record.type === "response_item" && record.payload.type === "message" && record.payload.role === "user") return [(record.payload.content ?? []).map(block => block.text ?? "").join("\n")];
+      return [];
+    });
+    const routing = records.filter(record => record.type === "turn_context").map(record => ({ model: record.payload.model ?? null, effort: record.payload.effort ?? null }));
+    const toolNames = [...new Set(records.filter(record => record.type === "response_item" && ["function_call", "custom_tool_call"].includes(record.payload.type)).map(record => record.payload.name))];
     return {
-      type: "pstack.session", id: meta.id,
-      parent,
+      type: "pstack.session", id: meta.id, parent,
+      prompt: messages.find(message => typeof message === "string" && message.trim()) ?? "",
+      model: routing.at(-1)?.model ?? null, effort: routing.at(-1)?.effort ?? null, routing,
+      toolNames, wroteFiles: toolNames.some(name => writeTools.has(name)),
       completed: records.some(record => record.type === "event_msg" && record.payload.type === "task_complete"),
     };
   });
@@ -241,14 +266,23 @@ async function main() {
         report.passed &&= report.workflowLoaded;
         reports.push(report);
         writeFileSync(join(output, "report.json"), JSON.stringify(reports, null, 2) + "\n");
-        if (!report.passed) throw new Error(`${runtime}/${scenario}: expected ${report.expected} delegation(s), saw ${report.calls.length}; inspect ${logPath}`);
+        if (!report.passed) {
+          if (report.delegationPassed && report.workflowLoaded && report.review.status === "unverified") {
+            process.exitCode = 2;
+            console.log(`Unverified review: inspect ${logPath}`);
+          } else throw new Error(`${runtime}/${scenario}: ${report.review.reason} Expected ${report.expected} delegation(s), saw ${report.calls.length}; inspect ${logPath}`);
+        }
       } finally {
         rmSync(home, { recursive: true, force: true });
         rmSync(cwd, { recursive: true, force: true });
       }
     }
   }
-  console.log(`Passed ${reports.length} live cases; report: ${join(output, "report.json")}`);
+  if (reports.every(report => report.passed)) console.log(`Passed ${reports.length} live cases; report: ${join(output, "report.json")}`);
+  else console.log(`Independent transcript inspection required; report: ${join(output, "report.json")}`);
 }
 
-if (import.meta.main) await main();
+if (import.meta.main) {
+  try { await main(); }
+  catch (error) { console.error(error.message); process.exitCode = 1; }
+}

@@ -20,10 +20,10 @@ Write the current runtime's per-role model override sheet, using the path in [Ot
 Claude Code has no auto-applied "rules" mechanism like Cursor's `.mdc`. The Claude Code config directory is `$CLAUDE_CONFIG_DIR` when that variable is set and `~/.claude` otherwise. This skill calls it `<config>`. Inclusion is explicit: the user adds a line to `<config>/CLAUDE.md` (or their project `CLAUDE.md`) such as:
 
 ```text
-@<config>/pstack-models.md
+@pstack-models.md
 ```
 
-with `<config>` written as the resolved path, so the file is loaded as context for every session.
+The relative import resolves beside `CLAUDE.md`, including when the config path contains spaces.
 
 The Codex home directory is `$CODEX_HOME` when that variable is set and `~/.codex` otherwise. This skill calls it `<codex-home>`.
 
@@ -39,7 +39,7 @@ The default role-to-model mapping is the rule shape shown in the Write the overr
 
 ### 3. Map and confirm
 
-Show every role with its current model, marking any real slug not in the detected set as needing a choice. Also list each line step 2 dropped or rewrote. Ask whether to accept as-is or change specific roles, offering the detected models plus `inherit-parent` and `auto` as the options. Prefer `AskUserQuestion` over free text. For panel roles (arena runners, architect runners, interrogate reviewers) the value is a list, and one subagent runs per entry, alias entries included, so the list length sets the count. `arena cross-judge pool` is also a list, but Arena selects one value from it whose model family differs from the parent's when possible. `swarm workers` is the default model for every worker unless a race or comparison assigns another model per arm.
+Show every role with its current model, marking any real slug not in the detected set as needing a choice. Also list each line step 2 dropped or rewrote. Ask whether to accept as-is or change specific roles, offering the detected models plus `inherit-parent` and `auto` as the options. Prefer `AskUserQuestion` over free text. For panel roles (arena runners, architect runners, interrogate reviewers) the value is a pool of available models. Apply the [delegation policy](../poteto-mode/references/delegation.md) before choosing how many agents to dispatch; a list entry does not require a spawn. `arena cross-judge pool` is also a list, but Arena selects one value from it whose model family differs from the parent's when possible. `swarm workers` is the default model for every worker unless a race or comparison assigns another model per arm.
 
 Then ask for the default reasoning effort, the `default effort` line. It is `session`, which keeps the parent session's effort, or one of the levels in [Models](#models). Start from the default listed there. Every role value without a suffix runs at it. Then ask whether any role should run at another level. On Claude Code a role value may carry one after its slug, as in `<slug> @xhigh`; panel entries take their own, as in `<slug> @xhigh, <slug> @max`. Each level is passed as the dispatch's effort, so the choice holds without changing the session. Leave the suffix off for the default effort.
 
@@ -53,12 +53,12 @@ Every real slug written must be in the detected set. `inherit-parent` and `auto`
 
 ### 6. Write the override sheet
 
-Write the current runtime's sheet with the shape below. Overwrite the whole file so re-runs stay idempotent.
+Read the existing sheet before writing. Update only recognized role and setting lines selected in this run, removing duplicate copies of those keys. Preserve all other prose, including delegation rules, effort precedence, bounded-helper restrictions, comments, and custom instructions. Remove a retired role only after reporting it in step 3. Use the shape below for a new sheet; it is not a replacement for an existing sheet. Re-running the same choices must leave the file unchanged.
 
 ```markdown
 # pstack model configuration
 
-Per-role model overrides for pstack skills. Each pstack SKILL.md names its defaults in a Models section; the values here override those defaults. Delete a line to fall back to the skill default. A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `Agent` call omits `model`); an alias entry in a panel list still counts toward that panel's fan-out. A model may carry a reasoning effort, as in `opus @xhigh` (levels: low, medium, high, xhigh, max); the role's subagent then runs at that level, each entry of a panel list on its own. `default effort` sets the level for a value without one; `session` keeps the parent session's effort. `session hook: off` stops the Claude Code, Codex, or Muse SessionStart hook, or the pstack Pi extension, from injecting the poteto-mode mandate; any other value, or no line, leaves it on.
+Per-role model overrides for pstack skills. Each pstack SKILL.md names its defaults in a Models section; the values here override those defaults. Delete a line to fall back to the skill default. A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `Agent` call omits `model`); a panel list is a model pool; the delegation gate decides whether any agents run. A model may carry a reasoning effort, as in `opus @xhigh` (levels: low, medium, high, xhigh, max); an authorized role's subagent then runs at that level. `default effort` sets the level for a value without one; `session` keeps the parent session's effort. `session hook: off` stops the Claude Code, Codex, or Muse SessionStart hook, or the pstack Pi extension, from injecting the poteto-mode mandate; any other value, or no line, leaves it on.
 
 feature, refactoring: sonnet
 bug-fix: opus
@@ -84,9 +84,9 @@ session hook: on
 
 ### 7. Wire it in
 
-On Claude Code, if `<config>/CLAUDE.md` does not already include `<config>/pstack-models.md`, append an `@` line naming the sheet's resolved path, such as `@~/.claude/pstack-models.md`, so the model rows load on every session. If the user prefers project scope, add the include to the project's `CLAUDE.md` instead.
+On Claude Code, if `<config>/CLAUDE.md` does not already include `<config>/pstack-models.md`, append `@pstack-models.md` beside that `CLAUDE.md`, so the model rows load on every session. If the user prefers project scope, resolve the sheet relative to that project file. Preserve an existing working import and do not add a duplicate.
 
-On Codex, paste the model rows and the `default effort` line into `<codex-home>/AGENTS.md`; Codex has no `@` include. Do not paste the `session hook` line there: the plugin hook reads it directly from `<codex-home>/pstack-models.md`.
+On Codex, update the existing pstack model rows and `default effort` line in `<codex-home>/AGENTS.md`, or add one pstack section when absent. Preserve other instructions and the existing pstack policy prose; do not append duplicate role rows. Codex has no `@` include. Do not paste the `session hook` line there: the plugin hook reads it directly from `<codex-home>/pstack-models.md`.
 
 On Muse, no include line is needed: the plugin hook reads the sheet directly and injects its role lines at session start. It runs only after the user approves the plugin's hooks, so name `muse plugins approve pstack` when the hook has not run yet.
 
@@ -108,7 +108,7 @@ The role lines are the same everywhere. What differs is the sheet path, how the 
 
 | Runtime | Sheet | Load | List models | Status |
 | --- | --- | --- | --- | --- |
-| Claude Code | `<config>/pstack-models.md` | `@<config>/pstack-models.md` in `<config>/CLAUDE.md` | the `Agent` tool's model parameter | verified live |
+| Claude Code | `<config>/pstack-models.md` | `@pstack-models.md` in `<config>/CLAUDE.md` | the `Agent` tool's model parameter | verified live |
 | Codex | `<codex-home>/pstack-models.md` | model rows: paste into `<codex-home>/AGENTS.md`; hook setting: read by the plugin | your configured Codex models, see [codex-tools.md](../poteto-mode/references/codex-tools.md#model-names) | hook contract tested; discovery verified |
 | Pi | `pstack-models.md` in the Pi agent directory, `$PI_CODING_AGENT_DIR` or `~/.pi/agent` | read by the pstack Pi extension, model rows and hook setting both; no include line | `pi --list-models`, see [pi-tools.md](../poteto-mode/references/pi-tools.md#model-names) and its `setup-pstack` note | extension contract tested offline; live results in the repository's `docs/pi-equivalence.md` |
 | GitHub Copilot (CLI and app) | `${COPILOT_HOME:-~/.copilot}/pstack-models.md` | the plugin hook checks it and injects its role lines at session start; skills-only installs read it with `view` | the `task` tool's `model` enum, see [copilot-tools.md](../poteto-mode/references/copilot-tools.md#model-names) | hook contract tested; CLI install smoke-tested |
